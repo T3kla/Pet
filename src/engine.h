@@ -1,7 +1,9 @@
 #pragma once
 
-class engine
+class Engine
 {
+    static Engine Instance;
+
   public:
-    void init();
+    static void Init();
 };

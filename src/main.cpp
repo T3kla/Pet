@@ -3,6 +3,5 @@
 
 int main(int, char **)
 {
-    engine e;
-    e.init();
+    Engine::Init();
 }
