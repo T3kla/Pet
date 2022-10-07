@@ -4,122 +4,122 @@
 
 // ------------------------------------------------------------------------------------------ v2f
 
-v2f::v2f() : x(0), y(0)
+V2f::V2f() : x(0), y(0)
 {
 }
 
-v2f::v2f(f32 x, f32 y) : x(x), y(y)
+V2f::V2f(f32 x, f32 y) : x(x), y(y)
 {
 }
 
-v2f::~v2f()
+V2f::~V2f()
 {
 }
 
-v2f v2f::operator+(v2f &o)
+V2f V2f::operator+(V2f &o)
 {
-    return v2f(x + o.x, y + o.y);
+    return V2f(x + o.x, y + o.y);
 }
 
-v2f v2f::operator-(v2f &o)
+V2f V2f::operator-(V2f &o)
 {
-    return v2f(x - o.x, y - o.y);
+    return V2f(x - o.x, y - o.y);
 }
 
-v2f v2f::operator*(v2f &o)
+V2f V2f::operator*(V2f &o)
 {
-    return v2f(x * o.x, y * o.y);
+    return V2f(x * o.x, y * o.y);
 }
 
-v2f v2f::operator/(v2f &o)
+V2f V2f::operator/(V2f &o)
 {
-    return v2f(x / o.x, y / o.y);
+    return V2f(x / o.x, y / o.y);
 }
 
-v2f v2f::operator+=(v2f &o)
+V2f V2f::operator+=(V2f &o)
 {
     x += o.x;
     y += o.y;
     return *this;
 }
 
-v2f v2f::operator-=(v2f &o)
+V2f V2f::operator-=(V2f &o)
 {
     x -= o.x;
     y -= o.y;
     return *this;
 }
 
-v2f v2f::operator*=(v2f &o)
+V2f V2f::operator*=(V2f &o)
 {
     x *= o.x;
     y *= o.y;
     return *this;
 }
 
-v2f v2f::operator/=(v2f &o)
+V2f V2f::operator/=(V2f &o)
 {
     x /= o.x;
     y /= o.y;
     return *this;
 }
 
-v2f v2f::operator*(f32 &o)
+V2f V2f::operator*(f32 &o)
 {
-    return v2f(x * o, y * o);
+    return V2f(x * o, y * o);
 }
 
-v2f v2f::operator/(f32 &o)
+V2f V2f::operator/(f32 &o)
 {
-    return v2f(x / o, y / o);
+    return V2f(x / o, y / o);
 }
 
-v2f v2f::operator*=(f32 &o)
+V2f V2f::operator*=(f32 &o)
 {
     x *= o;
     y *= o;
     return *this;
 }
 
-v2f v2f::operator/=(f32 &o)
+V2f V2f::operator/=(f32 &o)
 {
     x /= o;
     y /= o;
     return *this;
 }
 
-f32 v2f::length()
+f32 V2f::length()
 {
     return sqrtf(x * x + y * y);
 }
 
-v2f v2f::normalize()
+V2f V2f::normalize()
 {
     f32 l = length();
-    return v2f(x / l, y / l);
+    return V2f(x / l, y / l);
 }
 
-f32 v2f::dot(v2f &a, v2f &b)
+f32 V2f::dot(V2f &a, V2f &b)
 {
     return a.x * b.x + a.y * b.y;
 }
 
-f32 v2f::cross(v2f &a, v2f &b)
+f32 V2f::cross(V2f &a, V2f &b)
 {
     return a.x * b.y - a.y * b.x;
 }
 
-f32 v2f::distance(v2f &a, v2f &b)
+f32 V2f::distance(V2f &a, V2f &b)
 {
     return (b - a).length();
 }
 
-f32 v2f::angle(v2f &a, v2f &b)
+f32 V2f::angle(V2f &a, V2f &b)
 {
     return acosf(dot(a, b) / (a.length() * b.length()));
 }
 
-std::ostream &operator<<(std::ostream &os, const v2f &v)
+std::ostream &operator<<(std::ostream &os, const V2f &v)
 {
     os << "(" << v.x << ", " << v.y << ")";
     return os;

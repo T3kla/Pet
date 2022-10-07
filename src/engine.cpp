@@ -7,6 +7,6 @@ Engine Engine::Instance;
 
 void Engine::Init()
 {
-    v2f v = {4, 5};
+    V2f v = {4, 5};
     std::cout << v << std::endl;
 }

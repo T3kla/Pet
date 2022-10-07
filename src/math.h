@@ -5,40 +5,40 @@
 
 #define PI 3.14159265358979
 
-struct v2f
+struct V2f
 {
     f32 x;
     f32 y;
 
-    v2f();
-    v2f(f32 x, f32 y);
-    ~v2f();
+    V2f();
+    V2f(f32 x, f32 y);
+    ~V2f();
 
-    v2f operator+(v2f &o);
-    v2f operator-(v2f &o);
-    v2f operator*(v2f &o);
-    v2f operator/(v2f &o);
+    V2f operator+(V2f &o);
+    V2f operator-(V2f &o);
+    V2f operator*(V2f &o);
+    V2f operator/(V2f &o);
 
-    v2f operator+=(v2f &o);
-    v2f operator-=(v2f &o);
-    v2f operator*=(v2f &o);
-    v2f operator/=(v2f &o);
+    V2f operator+=(V2f &o);
+    V2f operator-=(V2f &o);
+    V2f operator*=(V2f &o);
+    V2f operator/=(V2f &o);
 
-    v2f operator*(f32 &o);
-    v2f operator/(f32 &o);
+    V2f operator*(f32 &o);
+    V2f operator/(f32 &o);
 
-    v2f operator*=(f32 &o);
-    v2f operator/=(f32 &o);
+    V2f operator*=(f32 &o);
+    V2f operator/=(f32 &o);
 
     f32 length();
-    v2f normalize();
+    V2f normalize();
 
-    static f32 dot(v2f &a, v2f &b);
-    static f32 cross(v2f &a, v2f &b);
-    static f32 distance(v2f &a, v2f &b);
-    static f32 angle(v2f &a, v2f &b);
+    static f32 dot(V2f &a, V2f &b);
+    static f32 cross(V2f &a, V2f &b);
+    static f32 distance(V2f &a, V2f &b);
+    static f32 angle(V2f &a, V2f &b);
 
-    friend std::ostream &operator<<(std::ostream &os, const v2f &v);
+    friend std::ostream &operator<<(std::ostream &os, const V2f &v);
 };
 
 // struct v3f
