@@ -1,7 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include "var.h"
+#include "core.h"
 
 #define PI 3.14159265358979
 

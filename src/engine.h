@@ -6,6 +6,7 @@ class Engine
 
   private:
     Engine() = default;
+    Engine(const Engine &) = delete;
     ~Engine() = default;
 
   public:

@@ -6,16 +6,24 @@
             "type": "cppbuild",
             "args": [
                 "-fdiagnostics-color=always",
-                "-Wall",
-                "-Wextra",
-                "-Wpedantic",
-                "-static",
-                // "-static-libgcc",
-                // "-static-libstdc++",
+                "-fmax-errors=10",
+                // "-Wall",
+                // "-Wextra",
+                // "-Wpedantic",
+
+                "-DGLFW_DLL", // Same as #define GLFW_DLL
+
+                "-I",
+                "${workspaceFolder}\\inc",
+                "-L",
+                "${workspaceFolder}\\lib",
+
                 "-g",
                 "${workspaceFolder}\\src\\*.cpp",
                 "-o",
-                "${workspaceFolder}\\bin\\Pet.exe"
+                "${workspaceFolder}\\bin\\Pet.exe",
+
+                "-lglfw3"
             ],
             "options": {
                 "cwd": "C:\\msys64\\mingw64\\bin"

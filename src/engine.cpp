@@ -1,12 +1,10 @@
-#include "engine.h"
-
-#include <iostream>
 #include "core.h"
 
 Engine Engine::Instance;
 
 void Engine::Init()
 {
-    V2f v = {4, 5};
-    std::cout << v << std::endl;
+    std::cout << "Engine::Init()" << std::endl;
+
+    Render::Init();
 }
