@@ -31,5 +31,11 @@
 *.out
 *.app
 
+# VS
+.vs
+Pet/x64
+x64
+
 # Exceptions
 !bin/glfw3.dll
+
