@@ -9,9 +9,7 @@
                 "C:\\Users\\segur\\Documents\\Visual Studio 2022\\Libraries\\glfw-3.3.8.bin.WIN64\\include"
             ],
             "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE",
+                "GLFW_DLL",
                 "GLFW_INCLUDE_VULKAN",
                 "GLM_FORCE_RADIANS",
                 "GLM_FORCE_DEPTH_ZERO_TO_ONE"
