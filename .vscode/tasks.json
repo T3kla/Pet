@@ -2,11 +2,15 @@
     "tasks": [
         {
             "label": "Build",
-            "command": "C:\\msys64\\mingw64\\bin\\g++.exe",
+            "command": "C:\\msys64\\clang64\\bin\\clang++.exe",
             "type": "cppbuild",
             "args": [
-                "-fdiagnostics-color=always",
-                "-fmax-errors=10",
+                // "-fdiagnostics-color=always",
+                // "-fmax-errors=10",
+
+                "-fcolor-diagnostics",
+                "-std=c++17",
+
                 // "-Wall",
                 // "-Wextra",
                 // "-Wpedantic",
@@ -29,7 +33,7 @@
                 "C:\\Users\\segur\\Documents\\Visual Studio 2022\\Libraries\\glfw-3.3.8.bin.WIN64\\include",
 
                 // Output
-                "-g",
+                // "-g",
                 "${workspaceFolder}\\src\\*.cpp",
                 "-o",
                 "${workspaceFolder}\\bin\\Pet.exe",
@@ -48,7 +52,7 @@
                 "-l:libglfw3dll.a"
             ],
             "options": {
-                "cwd": "C:\\msys64\\mingw64\\bin"
+                "cwd": "C:\\msys64\\clang64\\bin"
             },
             "problemMatcher": ["$gcc"],
             "group": {
