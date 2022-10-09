@@ -2,8 +2,20 @@
     "configurations": [
         {
             "name": "Win32",
-            "includePath": ["${workspaceFolder}\\inc"],
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "includePath": [
+                "${workspaceFolder}\\inc",
+                "C:\\VulkanSDK\\1.3.224.1\\Include",
+                "C:\\Users\\segur\\Documents\\Visual Studio 2022\\Libraries\\glm",
+                "C:\\Users\\segur\\Documents\\Visual Studio 2022\\Libraries\\glfw-3.3.8.bin.WIN64\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "GLFW_INCLUDE_VULKAN",
+                "GLM_FORCE_RADIANS",
+                "GLM_FORCE_DEPTH_ZERO_TO_ONE"
+            ],
             "windowsSdkVersion": "10.0.19041.0",
             "cStandard": "c17",
             "cppStandard": "c++17",
