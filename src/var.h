@@ -1,13 +1,13 @@
 #pragma once
 
-#define i16 signed short
-#define i32 signed int
-#define i64 signed long int
+typedef signed short i16;
+typedef signed int i32;
+typedef signed long int i64;
 
-#define u16 unsigned short
-#define u32 unsigned int
-#define u64 unsigned long int
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long int u64;
 
-#define f32 float
-#define f64 double
-#define f128 long double
+typedef float f32;
+typedef double f64;
+typedef long double f128;

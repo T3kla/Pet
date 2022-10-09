@@ -1,8 +1,7 @@
 #pragma once
 
 #include "core.h"
-
-struct V2f;
+using namespace glm;
 
 class Render
 {
@@ -11,7 +10,7 @@ class Render
 
     static GLFWwindow *Window;
     static const char *WindowTitle;
-    static V2f WindowSize;
+    static vec2 WindowSize;
 
   public:
   private:
@@ -23,5 +22,5 @@ class Render
 
   public:
     static void Init();
-    static V2f GetWindowSize();
+    static vec2 GetWindowSize();
 };
