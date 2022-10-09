@@ -55,7 +55,6 @@
         "list": "cpp",
         "map": "cpp",
         "set": "cpp",
-        "unordered_set": "cpp",
-        "ratio": "cpp"
+        "unordered_set": "cpp"
     }
 }

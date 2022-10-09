@@ -10,6 +10,7 @@
                 // "-Wall",
                 // "-Wextra",
                 // "-Wpedantic",
+                "-static",
 
                 // Defines
                 "-DGLFW_DLL",
@@ -42,8 +43,9 @@
                 "C:\\Users\\segur\\Documents\\Visual Studio 2022\\Libraries\\glfw-3.3.8.bin.WIN64\\lib-mingw-w64",
 
                 // Link libraries
-                "-lvulkan-1",
-                "-llibglfw3"
+                "-l:vulkan-1.lib",
+                "-l:libglfw3.a",
+                "-l:libglfw3dll.a"
             ],
             "options": {
                 "cwd": "C:\\msys64\\mingw64\\bin"
