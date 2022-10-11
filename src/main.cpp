@@ -13,9 +13,7 @@ int main()
     // std::cout << extensionCount << " extensions supported\n";
 
     while (!glfwWindowShouldClose(window))
-    {
         glfwPollEvents();
-    }
 
     glfwDestroyWindow(window);
 
