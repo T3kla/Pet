@@ -4,8 +4,6 @@ Engine Engine::Instance;
 
 void Engine::Init()
 {
-    std::cout << "Engine::Init()" << std::endl;
-
     Render::Init();
     Logic::Init();
     Input::Init();
@@ -50,18 +48,17 @@ void Engine::Run()
         //}
     }
 
-    Engine::Exit();
-
     // Audio::Exit();
-    // ThreadPool::Exit();
-}
 
-void Engine::Exit()
-{
+    Engine::Exit();
     Render::Exit();
     Logic::Exit();
     Input::Exit();
     Threads::Exit();
+}
+
+void Engine::Exit()
+{
 }
 
 void Engine::CloseRequest()

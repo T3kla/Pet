@@ -6,27 +6,59 @@ GLFWwindow *Render::Window = nullptr;
 const char *Render::WindowTitle = "PetProject";
 vec2 Render::WindowSize = vec2(1920, 1080);
 
+VkInstance Render::Vulkan = nullptr;
+
 void Render::Init()
 {
     // Initialize GLFW
 
-    bool result = false;
-
-    result = glfwInit() != 0 ? true : false;
-    std::cout << (result ? "GLFW Initialized" : "GLFW Panicked") << std::endl;
+    std::cout << (glfwInit() != 0 ? "GLFW Initialized" : "GLFW Panicked") << std::endl;
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     Window = glfwCreateWindow(WindowSize.x, WindowSize.y, WindowTitle, nullptr, nullptr);
 
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-    result = glfwVulkanSupported() != 0 ? true : false;
-    std::cout << (result ? "Vulkan Supported" : "Vulkan Not Supported") << std::endl;
+    std::cout << (glfwVulkanSupported() != 0 ? "Vulkan Supported" : "Vulkan Not Supported") << std::endl;
 
     // Initialize Vulkan
+
+    VkApplicationInfo appInfo{};                           // Optional arguments about our app.
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;    //
+    appInfo.pApplicationName = "Hello Triangle";           // May provide useful info to the driver
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0); // in order to optimize the app.
+    appInfo.pEngineName = "No Engine";                     //
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);      //
+    appInfo.apiVersion = VK_API_VERSION_1_0;               //
+
+    VkInstanceCreateInfo createInfo{};                                       // Non optional arguments.
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;               //
+    createInfo.pApplicationInfo = &appInfo;                                  // Tells the vulkan driver about
+                                                                             // required extensions and the
+    u32 glfwExtensionCount = 0;                                              // validations layers we want
+    const char **glfwExtensions;                                             // to use.
+                                                                             //
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount); // Required extensions comes from
+                                                                             // glfw and are passed to vulkan.
+    createInfo.enabledExtensionCount = glfwExtensionCount;                   //
+    createInfo.ppEnabledExtensionNames = glfwExtensions;                     //
+    createInfo.enabledLayerCount = 0;                                        //
+
+    if (vkCreateInstance(&createInfo, nullptr, &Vulkan) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create instance!");
+    else
+        std::cout << "Vulkan Instance Created" << std::endl;
+
+    // Extension support
+
+    u32 extensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    list<VkExtensionProperties> vkExtensions(extensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data());
+
+    std::cout << "Vulkan found extensions:" << std::endl;
+    for (const auto &extension : vkExtensions)
+        std::cout << "    " << extension.extensionName << std::endl;
 }
 
 void Render::Run()

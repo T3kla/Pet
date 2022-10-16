@@ -28,7 +28,7 @@ void Threads::Run()
 {
     while (true)
     {
-        Job job;
+        job job;
 
         {
             std::unique_lock<std::mutex> lock(mutex);
@@ -64,7 +64,7 @@ void Threads::Exit()
     threads.clear();
 }
 
-void Threads::AddJob(Job job)
+void Threads::AddJob(job job)
 {
     {
         std::unique_lock<std::mutex> lock(mutex);

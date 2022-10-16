@@ -2,7 +2,7 @@
 
 #include <functional>
 
-typedef std::function<void()> Job;
+typedef std::function<void()> job;
 
 class Threads
 {
@@ -20,6 +20,6 @@ class Threads
     static void Run();
     static void Exit();
 
-    static void AddJob(Job job);
+    static void AddJob(job job);
     static int GetThreadNum();
 };

@@ -178,7 +178,6 @@
     <ClInclude Include="logic.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="threads.h" />
-    <ClInclude Include="var.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

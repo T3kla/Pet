@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <vulkan/vulkan.h>
 
 using namespace glm;
 
@@ -13,6 +14,8 @@ class Render
     static GLFWwindow *Window;
     static const char *WindowTitle;
     static vec2 WindowSize;
+
+    static VkInstance Vulkan;
 
   public:
   private:
