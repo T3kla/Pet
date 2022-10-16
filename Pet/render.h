@@ -1,6 +1,8 @@
 #pragma once
 
-#include "core.h"
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
 using namespace glm;
 
 class Render
@@ -22,5 +24,8 @@ class Render
 
   public:
     static void Init();
+    static void Run();
+    static void Exit();
     static vec2 GetWindowSize();
+    static GLFWwindow *GetWindow();
 };

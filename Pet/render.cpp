@@ -8,12 +8,16 @@ vec2 Render::WindowSize = vec2(1920, 1080);
 
 void Render::Init()
 {
+    // Initialize GLFW
+
     bool result = false;
 
     result = glfwInit() != 0 ? true : false;
     std::cout << (result ? "GLFW Initialized" : "GLFW Panicked") << std::endl;
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
     Window = glfwCreateWindow(WindowSize.x, WindowSize.y, WindowTitle, nullptr, nullptr);
 
     uint32_t extensionCount = 0;
@@ -22,10 +26,16 @@ void Render::Init()
     result = glfwVulkanSupported() != 0 ? true : false;
     std::cout << (result ? "Vulkan Supported" : "Vulkan Not Supported") << std::endl;
 
-    while (!glfwWindowShouldClose(Window))
-        glfwPollEvents();
+    // Initialize Vulkan
+}
 
-    glfwDestroyWindow(Window);
+void Render::Run()
+{
+}
+
+void Render::Exit()
+{
+    glfwDestroyWindow(Render::GetWindow());
     glfwTerminate();
 }
 
@@ -37,4 +47,9 @@ void Render::OnWindowResize(GLFWwindow *window, int width, int height)
 vec2 Render::GetWindowSize()
 {
     return WindowSize;
+}
+
+GLFWwindow *Render::GetWindow()
+{
+    return Window;
 }
