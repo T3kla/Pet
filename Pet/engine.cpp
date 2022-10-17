@@ -22,7 +22,7 @@ void Engine::Run()
     // AssetLoader::LoadAssets();
     // SceneLoader::LoadScene<SceneAudio1>();
 
-    while (!Instance.closeRequested)
+    while (!Instance.quitRequested)
     {
         // Stasis::RefreshTime();
 
@@ -61,7 +61,7 @@ void Engine::Exit()
 {
 }
 
-void Engine::CloseRequest()
+void Engine::Quit()
 {
-    Instance.closeRequested = true;
+    Instance.quitRequested = true;
 }

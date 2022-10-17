@@ -5,7 +5,7 @@ class Engine
   private:
     static Engine Instance;
 
-    bool closeRequested = false;
+    bool quitRequested = false;
 
   public:
   private:
@@ -18,5 +18,5 @@ class Engine
     static void Run();
     static void Exit();
 
-    static void CloseRequest();
+    static void Quit();
 };

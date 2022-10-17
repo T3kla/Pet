@@ -132,30 +132,3 @@ GLFWwindow *Render::GetWindow()
 {
     return Window;
 }
-
-bool Render::CheckValidationLayers()
-{
-    u32 layerCount = 0u;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    list<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-    u32 validatedLayers = 0u;
-
-    for (auto *layerName : VkValidationLayers)
-    {
-        bool layerFound = false;
-
-        for (const auto &layerProperties : availableLayers)
-            if (strcmp(layerName, layerProperties.layerName) == 0)
-            {
-                layerFound = true;
-                break;
-            }
-
-        if (!layerFound)
-            return false;
-    }
-
-    return false;
-}
