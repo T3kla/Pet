@@ -13,7 +13,7 @@ class Render
 
     static GLFWwindow *Window;
     static const char *WindowTitle;
-    static vec2 WindowSize;
+    static i32vec2 WindowSize;
 
     static VkInstance Vulkan;
 
@@ -29,6 +29,6 @@ class Render
     static void Init();
     static void Run();
     static void Exit();
-    static vec2 GetWindowSize();
+    static i32vec2 GetWindowSize();
     static GLFWwindow *GetWindow();
 };

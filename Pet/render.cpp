@@ -4,7 +4,7 @@ Render Render::Instance;
 
 GLFWwindow *Render::Window = nullptr;
 const char *Render::WindowTitle = "PetProject";
-vec2 Render::WindowSize = vec2(1920, 1080);
+i32vec2 Render::WindowSize = i32vec2(1920, 1080);
 
 VkInstance Render::Vulkan = nullptr;
 
@@ -91,7 +91,7 @@ void Render::OnWindowResize(GLFWwindow *window, int width, int height)
     WindowSize = vec2(width, height);
 }
 
-vec2 Render::GetWindowSize()
+i32vec2 Render::GetWindowSize()
 {
     return WindowSize;
 }
