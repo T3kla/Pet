@@ -16,6 +16,7 @@ class Render
     static i32vec2 WindowSize;
 
     static VkInstance Vulkan;
+    static const list<const char *> VkValidationLayers;
 
   public:
   private:
@@ -29,6 +30,8 @@ class Render
     static void Init();
     static void Run();
     static void Exit();
+
     static i32vec2 GetWindowSize();
     static GLFWwindow *GetWindow();
+    static bool CheckValidationLayers();
 };

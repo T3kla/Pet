@@ -21,8 +21,15 @@ using job = std::function<void()>; //
 template <typename... Ts>          //
 using list = std::vector<Ts...>;   //
 
+#ifdef NDEBUG
+const bool Debug = false;
+#else
+const bool Debug = true;
+#endif
+
 #include "engine.h"
 #include "input.h"
+#include "logger.h"
 #include "logic.h"
 #include "render.h"
 #include "threads.h"

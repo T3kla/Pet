@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="logger.h" />
     <ClInclude Include="logic.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="threads.h" />
