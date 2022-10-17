@@ -51,14 +51,28 @@ void Render::Init()
 
     // Extension support
 
-    u32 extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    list<VkExtensionProperties> vkExtensions(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, vkExtensions.data());
+    u32 vkExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, nullptr);
+    list<VkExtensionProperties> vkExtensions(vkExtensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, vkExtensions.data());
+
+    // Validate extensions
 
     std::cout << "Vulkan found extensions:" << std::endl;
     for (const auto &extension : vkExtensions)
         std::cout << "    " << extension.extensionName << std::endl;
+
+    std::cout << "GLFW required extensions:" << std::endl;
+    for (size_t i = 0; i < glfwExtensionCount; i++)
+        std::cout << "    " << glfwExtensions[i] << std::endl;
+
+    i32 validatedExtensions = 0;
+    for (size_t i = 0; i < glfwExtensionCount; i++)
+        for (const auto &extension : vkExtensions)
+            if (strcmp(glfwExtensions[i], extension.extensionName) == 0)
+                validatedExtensions++;
+
+    std::cout << "Required extensions validated: " << validatedExtensions << "/" << glfwExtensionCount << std::endl;
 }
 
 void Render::Run()
@@ -67,6 +81,7 @@ void Render::Run()
 
 void Render::Exit()
 {
+    vkDestroyInstance(Vulkan, nullptr);
     glfwDestroyWindow(Render::GetWindow());
     glfwTerminate();
 }
