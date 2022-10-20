@@ -142,8 +142,6 @@
   <ItemGroup>
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="input.cpp" />
-    <ClCompile Include="logger.cpp" />
-    <ClCompile Include="logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="threads.cpp" />

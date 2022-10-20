@@ -4,7 +4,7 @@ Render Render::Instance;
 
 GLFWwindow *Render::Window = nullptr;
 const char *Render::WindowTitle = "PetProject";
-i32vec2 Render::WindowSize = i32vec2(1920, 1080);
+i32vec2 Render::WindowSize = i32vec2(1280, 720);
 
 VkInstance Render::Vulkan = nullptr;
 const list<const char *> Render::VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
@@ -52,8 +52,8 @@ void Render::Init()
         std::cout << "    " << glfwExtensions[i] << std::endl;
 
     u32 validatedExtensions = 0;
-    for (size_t i = 0; i < glfwExtensionCount; i++)
-        for (const auto &extension : vkExtensions)
+    for (auto i = 0; i < glfwExtensionCount; i++)
+        for (auto &extension : vkExtensions)
             if (strcmp(glfwExtensions[i], extension.extensionName) == 0)
                 validatedExtensions++;
 
@@ -99,12 +99,18 @@ void Render::Init()
     createInfo.ppEnabledExtensionNames = glfwExtensions;       // Required extensions comes from glfw and are
     createInfo.enabledLayerCount = 0;                          // passed to vulkan.
 
+    if (Debug)
+    {
+        createInfo.enabledLayerCount = (u32)VkValidationLayers.size();
+        createInfo.ppEnabledLayerNames = VkValidationLayers.data();
+    }
+
     // Vulkan initialization
 
     if (vkCreateInstance(&createInfo, nullptr, &Vulkan) != VK_SUCCESS)
-        throw std::runtime_error("\nFailed to create instance!");
+        throw std::runtime_error("\nVulkan failed to create instance!");
     else
-        std::cout << std::endl << "Vulkan Instance Created" << std::endl;
+        std::cout << std::endl << "Vulkan instance created!" << std::endl;
 }
 
 void Render::Run()
