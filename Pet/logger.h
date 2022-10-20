@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string.h>
 
 struct None
 {
@@ -46,4 +47,5 @@ template <typename List> void log(const char *file, int line, const LogData<List
     std::cout << "\n";
 }
 
-#define LOG(x) (log(__FILE__, __LINE__, LogData<None>() << x))
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define LOG(x) (log(__FILENAME__, __LINE__, LogData<None>() << x))

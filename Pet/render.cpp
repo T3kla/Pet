@@ -52,7 +52,7 @@ void Render::Init()
         std::cout << "    " << glfwExtensions[i] << std::endl;
 
     u32 validatedExtensions = 0;
-    for (auto i = 0; i < glfwExtensionCount; i++)
+    for (auto i = 0u; i < glfwExtensionCount; i++)
         for (auto &extension : vkExtensions)
             if (strcmp(glfwExtensions[i], extension.extensionName) == 0)
                 validatedExtensions++;
