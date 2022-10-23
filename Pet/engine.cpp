@@ -4,9 +4,6 @@ Engine Engine::Instance;
 
 void Engine::Init()
 {
-    LOG("tu madre");
-    LOG("tu madre" << 3 << "lemao");
-
     Render::Init();
     Logic::Init();
     Input::Init();

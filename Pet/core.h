@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <stdint.h>
+#include <string.h>
 #include <vector>
 
 using i16 = int16_t;               //
@@ -21,10 +22,10 @@ using job = std::function<void()>; //
 template <typename... Ts>          //
 using list = std::vector<Ts...>;   //
 
-#ifdef NDEBUG
-const bool Debug = false;
-#else
+#ifdef _DEBUG
 const bool Debug = true;
+#else
+const bool Debug = false;
 #endif
 
 #include "engine.h"

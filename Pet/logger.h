@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string.h>
 
+namespace Logger
+{
+
 struct None
 {
 };
@@ -30,22 +33,27 @@ LogData<Pair<Begin, const char *>> operator<<(LogData<Begin> begin, const char (
     return {{begin.list, value}};
 }
 
-inline void printList(std::ostream &os, None)
+inline void PrintList(std::ostream &os, None)
 {
 }
 
-template <typename Begin, typename Last> void printList(std::ostream &os, const Pair<Begin, Last> &data)
+template <typename Begin, typename Last> void PrintList(std::ostream &os, const Pair<Begin, Last> &data)
 {
-    printList(os, data.first);
+    PrintList(os, data.first);
     os << data.second;
 }
 
-template <typename List> void log(const char *file, int line, const LogData<List> &data)
+template <typename List> void Log(const char *file, int line, const LogData<List> &data)
 {
-    std::cout << file << " (" << line << "): ";
-    printList(std::cout, data.list);
+    std::cout << file << " [" << line << "]: ";
+    PrintList(std::cout, data.list);
     std::cout << "\n";
 }
 
+} // namespace Logger
+
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-#define LOG(x) (log(__FILENAME__, __LINE__, LogData<None>() << x))
+
+#ifdef _DEBUG
+#define LOG(x) (Logger::Log(__FILENAME__, __LINE__, Logger::LogData<Logger::None>() << x))
+#endif

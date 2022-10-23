@@ -16,6 +16,7 @@ class Render
     static i32vec2 WindowSize;
 
     static VkInstance Vulkan;
+    static VkDebugUtilsMessengerEXT DebugMessenger;
     static const list<const char *> VkValidationLayers;
 
   public:
@@ -25,6 +26,11 @@ class Render
     ~Render() = default;
 
     static void OnWindowResize(GLFWwindow *window, int width, int height);
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                        VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                                                        void *pUserData);
 
   public:
     static void Init();
