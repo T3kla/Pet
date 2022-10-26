@@ -8,6 +8,8 @@ i32vec2 Render::WindowSize = i32vec2(1280, 720);
 
 VkInstance Render::VulkanInstance;
 VkDebugUtilsMessengerEXT Render::VulkanMessenger;
+VkPhysicalDevice Render::VulkanDevice;
+
 const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
 void Render::Init()
@@ -86,16 +88,16 @@ void Render::Init()
     std::cout << std::endl;
 
     std::cout << "Required layers:" << std::endl;
-    for (auto &layer : VkValidationLayers)
+    for (const auto &layer : VkValidationLayers)
         std::cout << "    " << layer << std::endl;
 
     std::cout << "Available layers:" << std::endl;
-    for (auto &layer : availableLayers)
+    for (const auto &layer : availableLayers)
         std::cout << "    " << layer.layerName << std::endl;
 
     u32 validatedLayers = 0u;
-    for (auto &req : VkValidationLayers)
-        for (auto &avl : availableLayers)
+    for (const auto &req : VkValidationLayers)
+        for (const auto &avl : availableLayers)
             if (strcmp(req, avl.layerName) == 0)
                 validatedLayers++;
 
@@ -154,6 +156,42 @@ void Render::Init()
         else
             throw std::runtime_error("\nFailed to create debug messenger!");
     }
+
+    // Physical device
+
+    u32 deviceCount = 0;
+    vkEnumeratePhysicalDevices(VulkanInstance, &deviceCount, nullptr);
+
+    if (deviceCount == 0)
+        throw std::runtime_error("\nFailed to find GPUs with Vulkan support!");
+
+    list<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(VulkanInstance, &deviceCount, devices.data());
+
+    odic<u32, VkPhysicalDevice> candidates;
+
+    for (const auto &device : devices)
+    {
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        u32 score = 0;
+
+        score += deviceProperties.limits.maxImageDimension2D;
+        if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            score += 1000;
+        if (!deviceFeatures.geometryShader)
+            score = 0;
+
+        candidates.insert({score, device});
+    }
+
+    if (candidates.rbegin()->first > 0)
+        VulkanDevice = candidates.rbegin()->second;
+    else
+        throw std::runtime_error("\nFailed to find a suitable GPU!");
 }
 
 void Render::Run()

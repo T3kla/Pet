@@ -17,6 +17,7 @@ class Render
 
     static VkInstance VulkanInstance;
     static VkDebugUtilsMessengerEXT VulkanMessenger;
+    static VkPhysicalDevice VulkanDevice;
 
   public:
   private:
