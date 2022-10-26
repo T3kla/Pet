@@ -6,9 +6,9 @@ GLFWwindow *Render::Window = nullptr;
 const char *Render::WindowTitle = "PetProject";
 i32vec2 Render::WindowSize = i32vec2(1280, 720);
 
-VkInstance Render::Vulkan;
-VkDebugUtilsMessengerEXT Render::DebugMessenger;
-const list<const char *> Render::VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+VkInstance Render::VulkanInstance;
+VkDebugUtilsMessengerEXT Render::VulkanMessenger;
+const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
 void Render::Init()
 {
@@ -113,12 +113,14 @@ void Render::Init()
     instanceInfo.ppEnabledExtensionNames = requiredExtensions.data();
     instanceInfo.enabledLayerCount = 0;
     instanceInfo.ppEnabledLayerNames = nullptr;
+    instanceInfo.pNext = nullptr;
 
-    // Vulkan debug messenger
+    // Vulkan setup debug messenger
+
+    VkDebugUtilsMessengerCreateInfoEXT messengerInfo{};
 
     if (Debug)
     {
-        VkDebugUtilsMessengerCreateInfoEXT messengerInfo{};
         messengerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         messengerInfo.messageSeverity =
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -128,10 +130,6 @@ void Render::Init()
         messengerInfo.pfnUserCallback = DebugCallback;
         messengerInfo.pUserData = nullptr;
 
-        auto fn = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(Vulkan, "vkCreateDebugUtilsMessengerEXT");
-        if (fn != nullptr)
-            fn(Vulkan, &messengerInfo, nullptr, &DebugMessenger);
-
         instanceInfo.enabledLayerCount = (u32)VkValidationLayers.size();
         instanceInfo.ppEnabledLayerNames = VkValidationLayers.data();
         instanceInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&messengerInfo;
@@ -139,10 +137,23 @@ void Render::Init()
 
     // Vulkan initialization
 
-    if (vkCreateInstance(&instanceInfo, nullptr, &Vulkan) != VK_SUCCESS)
-        throw std::runtime_error("\nVulkan failed to create instance!");
-    else
+    if (vkCreateInstance(&instanceInfo, nullptr, &VulkanInstance) == VK_SUCCESS)
         std::cout << std::endl << "Vulkan instance created!" << std::endl;
+    else
+        throw std::runtime_error("\nVulkan failed to create instance!");
+
+    // Vulkan attatch debug messenger
+
+    if (Debug)
+    {
+        auto fn =
+            (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VulkanInstance, "vkCreateDebugUtilsMessengerEXT");
+
+        if (fn)
+            fn(VulkanInstance, &messengerInfo, nullptr, &VulkanMessenger);
+        else
+            throw std::runtime_error("\nFailed to create debug messenger!");
+    }
 }
 
 void Render::Run()
@@ -153,12 +164,14 @@ void Render::Exit()
 {
     if (Debug)
     {
-        auto fn = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(Vulkan, "vkDestroyDebugUtilsMessengerEXT");
-        if (fn != nullptr)
-            fn(Vulkan, DebugMessenger, nullptr);
+        auto fn = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VulkanInstance,
+                                                                             "vkDestroyDebugUtilsMessengerEXT");
+
+        if (fn)
+            fn(VulkanInstance, VulkanMessenger, nullptr);
     }
 
-    vkDestroyInstance(Vulkan, nullptr);
+    vkDestroyInstance(VulkanInstance, nullptr);
     glfwDestroyWindow(Render::GetWindow());
     glfwTerminate();
 }
