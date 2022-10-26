@@ -6,6 +6,7 @@ kanban-plugin: basic
 
 ## ToDo
 
+- [ ] Setup: Logical device and queues
 - [ ] Presentation: Window surface
 - [ ] Presentation: Swap chain
 - [ ] Presentation: Image views
@@ -23,7 +24,7 @@ kanban-plugin: basic
 
 ## Doing
 
-- [ ] Setup: Logical device and queues
+- [ ] Setup: Physical device and queue families
 
 
 ## Done
