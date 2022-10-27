@@ -8,6 +8,7 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <optional>
 #include <stdint.h>
 #include <string.h>
 
@@ -28,6 +29,8 @@ using u32 = uint32_t;              //
 using u64 = uint64_t;              //
 using job = std::function<void()>; //
 
+template <typename... Ts>                   //
+using opt = std::optional<Ts...>;           //
 template <typename... Ts>                   //
 using array = std::array<Ts...>;            //
 template <typename... Ts>                   //
