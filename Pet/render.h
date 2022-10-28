@@ -1,8 +1,6 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <vulkan/vulkan.h>
+#include "core.h"
 
 using namespace glm;
 
@@ -24,6 +22,13 @@ class Render
     Render() = default;
     Render(const Render &) = delete;
     ~Render() = default;
+
+    static GLFWwindow *InitializeGLFW();
+    static VkApplicationInfo PopulateVkAppInfo();
+
+    static list<const char *> GetRequiredExtensions();
+    static list<VkExtensionProperties> GetAvailableExtensions();
+    static bool ValidateExtensions(const list<const char *> &required, const list<VkExtensionProperties> &available);
 
     static void OnWindowResize(GLFWwindow *window, int width, int height);
 

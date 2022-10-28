@@ -1,4 +1,4 @@
-#include "core.h"
+#include "render.h"
 
 Render Render::Instance;
 
@@ -14,66 +14,18 @@ const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
 void Render::Init()
 {
-    // Initialize GLFW
+    auto window = InitializeGLFW();
+    auto vkAppInfo = PopulateVkAppInfo();
 
-    std::cout << (glfwInit() != 0 ? "GLFW Initialized" : "GLFW Panicked") << std::endl;
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    Window = glfwCreateWindow(WindowSize.x, WindowSize.y, WindowTitle, nullptr, nullptr);
-
-    std::cout << (glfwVulkanSupported() != 0 ? "Vulkan Supported" : "Vulkan Not Supported") << std::endl;
-
-    // Vulkan optinal app info
-
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Hello Triangle";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    Window = window;
 
     // Validate extensions
 
-    u32 requiredExtensionCount, availableExtensionCount;
+    // auto requiredExtensions = GetRequiredExtensions();
+    // auto availableExtensions = GetAvailableExtensions();
 
-    const char **requiredExtensionsRaw;
-    requiredExtensionsRaw = glfwGetRequiredInstanceExtensions(&requiredExtensionCount);
-
-    list<const char *> requiredExtensions(requiredExtensionsRaw, requiredExtensionsRaw + requiredExtensionCount);
-
-    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
-    list<VkExtensionProperties> availableExtensions(availableExtensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, availableExtensions.data()); //
-
-    if (Debug)
-    {
-        requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-        requiredExtensionCount++;
-    }
-
-    std::cout << std::endl;
-
-    std::cout << "Required extensions:" << std::endl;
-    for (const auto &extension : requiredExtensions)
-        std::cout << "    " << extension << std::endl;
-
-    std::cout << "Available extensions:" << std::endl;
-    for (const auto &extension : availableExtensions)
-        std::cout << "    " << extension.extensionName << std::endl;
-
-    u32 validatedExtensions = 0;
-    for (const auto &required : requiredExtensions)
-        for (const auto &available : availableExtensions)
-            if (strcmp(required, available.extensionName) == 0)
-                validatedExtensions++;
-
-    std::cout << "Required extensions validated: " << validatedExtensions << "/" << requiredExtensionCount << std::endl;
-
-    if (validatedExtensions < requiredExtensionCount)
-        throw std::runtime_error("\nRequired extensions not available!");
+    // if (!ValidateExtensions(requiredExtensions, availableExtensions))
+    //     throw std::runtime_error("\nExtension validation failed!");
 
     // Validate layers
 
@@ -110,9 +62,9 @@ void Render::Init()
 
     VkInstanceCreateInfo instanceInfo{};
     instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceInfo.pApplicationInfo = &appInfo;
-    instanceInfo.enabledExtensionCount = requiredExtensionCount;
-    instanceInfo.ppEnabledExtensionNames = requiredExtensions.data();
+    instanceInfo.pApplicationInfo = &vkAppInfo;
+    // instanceInfo.enabledExtensionCount = requiredExtensions.size();
+    // instanceInfo.ppEnabledExtensionNames = requiredExtensions.data();
     instanceInfo.enabledLayerCount = 0;
     instanceInfo.ppEnabledLayerNames = nullptr;
     instanceInfo.pNext = nullptr;
@@ -214,19 +166,87 @@ void Render::Exit()
     glfwTerminate();
 }
 
+GLFWwindow *Render::InitializeGLFW()
+{
+    if (glfwInit() == 0)
+        throw std::runtime_error("\nGLFW Panicked!");
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    auto window = glfwCreateWindow(WindowSize.x, WindowSize.y, WindowTitle, nullptr, nullptr);
+
+    if (glfwVulkanSupported() == 0)
+        throw std::runtime_error("\nGLFW Vulkan Not Supported!");
+
+    return window;
+}
+
+VkApplicationInfo Render::PopulateVkAppInfo()
+{
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Pet";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "PetEngine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    return appInfo;
+}
+
+list<const char *> GetRequiredExtensions()
+{
+    u32 count;
+
+    auto **raw = glfwGetRequiredInstanceExtensions(&count);
+    auto extensions = list<const char *>(raw, raw + count);
+
+    if (Debug)
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+    return extensions;
+}
+
+list<VkExtensionProperties> GetAvailableExtensions()
+{
+    u32 count;
+
+    vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
+    auto extensions = list<VkExtensionProperties>(count);
+    vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data());
+
+    return extensions;
+}
+
+bool ValidateExtensions(const list<const char *> &required, const list<VkExtensionProperties> &available)
+{
+    u32 reqCount = (u32)required.size();
+    u32 validated = 0;
+
+    std::cout << std::endl;
+
+    std::cout << "Required extensions [" << reqCount << "] : " << std::endl;
+    for (const auto &ext : required)
+        std::cout << "    " << ext << std::endl;
+
+    std::cout << "Available extensions [" << reqCount << "] : " << std::endl;
+    for (const auto &ext : available)
+        std::cout << "    " << ext.extensionName << std::endl;
+
+    for (const auto &req : required)
+        for (const auto &avl : available)
+            if (strcmp(req, avl.extensionName) == 0)
+                validated++;
+
+    std::cout << "Required extensions validated: " << validated << "/" << reqCount << std::endl;
+
+    return validated == reqCount;
+}
+
 void Render::OnWindowResize(GLFWwindow *window, int width, int height)
 {
     WindowSize = vec2(width, height);
-}
-
-i32vec2 Render::GetWindowSize()
-{
-    return WindowSize;
-}
-
-GLFWwindow *Render::GetWindow()
-{
-    return Window;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL Render::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -237,4 +257,14 @@ VKAPI_ATTR VkBool32 VKAPI_CALL Render::DebugCallback(VkDebugUtilsMessageSeverity
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
     return VK_FALSE;
+}
+
+i32vec2 Render::GetWindowSize()
+{
+    return WindowSize;
+}
+
+GLFWwindow *Render::GetWindow()
+{
+    return Window;
 }
