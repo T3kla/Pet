@@ -1,4 +1,0 @@
-
-- [ ] crear 10 torres distribuidas sobre el terreno de forma aleatoria a ras de suelo para ello usar la funcion SignedUnitRand() que se encuentra en el fichero _Hinge2Vehicle.cpp_, cada torre teneis que crearla dentro de la funcion createTower(btScalar posX, btScalar posZ) las torres tiene una base de 3x3 cajas y altura de 12 pisos. Las torres tienen que aparecer a ras de suelo y enteras, sin cajas caidas por el terreno, las cajas de la torre tienen que desactivarse(sleeping) y activarse(awake) en dinamicas solo cuando les golpea algun otro objeto.
-
-- [ ] crear otro vehiculo y engancharlo al que ya existe con una constraint como un remolque, uno vez hecho esto crear un segundo vehiculo y engancharlo al anterior de forma que haya 3 vehiculos enganchados por constraints, para crear cada remolque usar la funcion createVagon( btRaycastVehicle* parent_vehicle).
