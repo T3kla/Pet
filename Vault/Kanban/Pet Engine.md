@@ -29,9 +29,10 @@ kanban-plugin: basic
 
 ## Done
 
-- [ ] Setup: Base code
-- [ ] Setup: Instance
-- [ ] Setup: Validation layers
+**Complete**
+- [x] Setup: Base code
+- [x] Setup: Instance
+- [x] Setup: Validation layers
 
 
 
