@@ -7,6 +7,7 @@ using namespace glm;
 struct QueueFamilyIndices
 {
     opt<uint32_t> graphicsFamily;
+    opt<uint32_t> presentFamily;
 
     bool IsComplete();
 };
@@ -28,6 +29,7 @@ class Render
     static VkDevice VkLogDevice;
 
     static VkQueue VkGraphicsQueue;
+    static VkSurfaceKHR VkSurface;
 
   public:
   private:
@@ -41,6 +43,7 @@ class Render
                                                        const list<const char *> &requiredExtensions,
                                                        const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo);
     static VkDebugUtilsMessengerCreateInfoEXT PopulateVkMessengerInfo();
+    static VkWin32SurfaceCreateInfoKHR PopulateVkSurface();
 
     // Extension validation
 
@@ -57,6 +60,7 @@ class Render
 
     static VkPhysicalDevice GetMostSuitableDevice();
     static u32 RateDevice(const VkPhysicalDevice &device);
+    static bool RateExtensionSupport(const VkPhysicalDevice &device);
 
     // Queue family validation
 
@@ -71,6 +75,8 @@ class Render
     // Graphics queue
 
     static VkQueue GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyIndices &indices);
+
+    //
 
     static void OnWindowResize(GLFWwindow *window, int width, int height);
 

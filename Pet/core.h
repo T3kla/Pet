@@ -1,12 +1,19 @@
 #pragma once
 
+#define VK_USE_PLATFORM_WIN32_KHR
+
 #define GLFW_INCLUDE_VULKAN
+#define GLFW_EXPOSE_NATIVE_WIN32
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include <GLFW/glfw3.h>
-#include <functional>
+#include <GLFW/glfw3native.h>
+
 #include <glm/glm.hpp>
+
+#include <functional>
 #include <iostream>
 #include <optional>
 #include <stdint.h>
@@ -28,6 +35,7 @@ using u16 = uint16_t;              //
 using u32 = uint32_t;              //
 using u64 = uint64_t;              //
 using job = std::function<void()>; //
+using str = std::string;           //
 
 template <typename... Ts>                   //
 using opt = std::optional<Ts...>;           //
@@ -49,9 +57,9 @@ template <typename... Ts>                   //
 using map = std::unordered_multimap<Ts...>; //
 
 #ifdef _DEBUG
-const bool Debug = true;
+static bool PetDebug = false;
 #else
-const bool Debug = false;
+static bool PetDebug = false;
 #endif
 
 #include "engine.h"

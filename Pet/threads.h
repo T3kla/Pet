@@ -6,7 +6,6 @@ typedef std::function<void()> job;
 
 class Threads
 {
-  private:
     static Threads Instance;
 
   public:

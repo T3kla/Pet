@@ -6,22 +6,24 @@
 #include <thread>
 #include <vector>
 
-static int threadNum = 0;
-static std::vector<std::thread> threads;
-static std::mutex mutex;
-static std::condition_variable condition;
-static std::queue<std::function<void()>> jobs;
-static bool shutdown = false;
+using namespace std;
+
+static vector<thread> ThreadPool;
+static int ThreadPoolSize = 0;
+static mutex ThreadMutex;
+static condition_variable ThreadCondition;
+static queue<function<void()>> ThreadJobs;
+static bool ThreadShutdown = false;
 
 Threads Threads::Instance;
 
 void Threads::Init()
 {
-    threadNum = std::thread::hardware_concurrency();
-    threads.reserve(threadNum);
+    ThreadPoolSize = thread::hardware_concurrency();
+    ThreadPool.reserve(ThreadPoolSize);
 
-    for (int i = 0; i < threadNum; i++)
-        threads.push_back(std::thread(&Run));
+    for (int i = 0; i < ThreadPoolSize; i++)
+        ThreadPool.push_back(thread(&Run));
 }
 
 void Threads::Run()
@@ -31,16 +33,16 @@ void Threads::Run()
         job job;
 
         {
-            std::unique_lock<std::mutex> lock(mutex);
+            unique_lock<mutex> lock(ThreadMutex);
 
             // Threads *a = &Instance;
-            condition.wait(lock, []() { return !jobs.empty() || shutdown; });
+            ThreadCondition.wait(lock, []() { return !ThreadJobs.empty() || ThreadShutdown; });
 
-            if (shutdown)
+            if (ThreadShutdown)
                 goto end;
 
-            job = jobs.front();
-            jobs.pop();
+            job = ThreadJobs.front();
+            ThreadJobs.pop();
         }
 
         job();
@@ -51,30 +53,30 @@ end:;
 void Threads::Exit()
 {
     {
-        std::unique_lock<std::mutex> lock(mutex);
-        shutdown = true;
+        unique_lock<mutex> lock(ThreadMutex);
+        ThreadShutdown = true;
     }
 
-    condition.notify_all();
+    ThreadCondition.notify_all();
 
-    for (auto &&t : threads)
+    for (auto &&t : ThreadPool)
         if (t.joinable())
             t.join();
 
-    threads.clear();
+    ThreadPool.clear();
 }
 
 void Threads::AddJob(job job)
 {
     {
-        std::unique_lock<std::mutex> lock(mutex);
-        jobs.push(job);
+        unique_lock<mutex> lock(ThreadMutex);
+        ThreadJobs.push(job);
     }
 
-    condition.notify_one();
+    ThreadCondition.notify_one();
 }
 
 int Threads::GetThreadNum()
 {
-    return threadNum;
+    return ThreadPoolSize;
 }

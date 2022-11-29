@@ -14,12 +14,14 @@ QueueFamilyIndices Render::VkPhyDeviceIndices;
 VkDevice Render::VkLogDevice;
 
 VkQueue Render::VkGraphicsQueue;
+VkSurfaceKHR Render::VkSurface;
 
 const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+const list<const char *> VkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 bool QueueFamilyIndices::IsComplete()
 {
-    return graphicsFamily.has_value();
+    return graphicsFamily.has_value() && presentFamily.has_value();
 }
 
 void Render::Init()
@@ -65,7 +67,7 @@ void Render::Init()
 
     // Vulkan attatch debug messenger
 
-    if (Debug)
+    if (PetDebug)
     {
         auto fn =
             (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VkInstance, "vkCreateDebugUtilsMessengerEXT");
@@ -76,6 +78,16 @@ void Render::Init()
             throw std::runtime_error("\nFailed to create debug messenger!");
     }
 
+    // Surface
+
+    auto vkSurfaceInfo = PopulateVkSurface();
+
+    if (glfwCreateWindowSurface(VkInstance, Window, nullptr, &VkSurface) != VK_SUCCESS)
+        throw std::runtime_error("\nFailed to create window surface!");
+
+    // if (vkCreateWin32SurfaceKHR(VkInstance, &vkSurfaceInfo, nullptr, &VkSurface) != VK_SUCCESS)
+    //     throw std::runtime_error("\nFailed to create window surface!");
+
     // Physical device
 
     VkPhyDevice = GetMostSuitableDevice();
@@ -83,8 +95,8 @@ void Render::Init()
 
     // Logical device
 
-    u32 extensionNum = requiredExtensions.size();
-    u32 layerNum = requiredLayers.size();
+    u32 extensionNum = (u32)requiredExtensions.size();
+    u32 layerNum = (u32)requiredLayers.size();
 
     VkLogDevice =
         GetLogicalDevice(VkPhyDevice, VkPhyDeviceIndices, extensionNum, requiredExtensions, layerNum, requiredLayers);
@@ -100,7 +112,7 @@ void Render::Run()
 
 void Render::Exit()
 {
-    if (Debug)
+    if (PetDebug)
     {
         auto fn =
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VkInstance, "vkDestroyDebugUtilsMessengerEXT");
@@ -109,9 +121,11 @@ void Render::Exit()
             fn(VkInstance, VkMessenger, nullptr);
     }
 
-    vkDestroyInstance(VkInstance, nullptr);
     vkDestroyDevice(VkLogDevice, nullptr);
-    glfwDestroyWindow(Render::GetWindow());
+    vkDestroySurfaceKHR(VkInstance, VkSurface, nullptr);
+    vkDestroyInstance(VkInstance, nullptr);
+
+    glfwDestroyWindow(Window);
     glfwTerminate();
 }
 
@@ -135,59 +149,70 @@ GLFWwindow *Render::InitializeGLFW()
 
 VkApplicationInfo Render::PopulateVkAppInfo()
 {
-    VkApplicationInfo appInfo{};
+    VkApplicationInfo info{};
 
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Pet";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "PetEngine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    info.pApplicationName = "Pet";
+    info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    info.pEngineName = "PetEngine";
+    info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    info.apiVersion = VK_API_VERSION_1_0;
 
-    return appInfo;
+    return info;
 }
 
 VkInstanceCreateInfo Render::PopulateVkInstanceInfo(const VkApplicationInfo &vkAppInfo,
                                                     const list<const char *> &requiredExtensions,
                                                     const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo)
 {
-    VkInstanceCreateInfo instanceInfo{};
+    VkInstanceCreateInfo info{};
 
-    instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceInfo.pApplicationInfo = &vkAppInfo;
-    instanceInfo.enabledExtensionCount = requiredExtensions.size();
-    instanceInfo.ppEnabledExtensionNames = requiredExtensions.data();
-    instanceInfo.enabledLayerCount = 0;
-    instanceInfo.ppEnabledLayerNames = nullptr;
-    instanceInfo.pNext = nullptr;
+    info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    info.pApplicationInfo = &vkAppInfo;
+    info.enabledExtensionCount = (u32)requiredExtensions.size();
+    info.ppEnabledExtensionNames = requiredExtensions.data();
+    info.enabledLayerCount = 0;
+    info.ppEnabledLayerNames = nullptr;
+    info.pNext = nullptr;
 
-    if (Debug)
+    if (PetDebug)
     {
-        instanceInfo.enabledLayerCount = (u32)VkValidationLayers.size();
-        instanceInfo.ppEnabledLayerNames = VkValidationLayers.data();
-        instanceInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&messengerInfo;
+        info.enabledLayerCount = (u32)VkValidationLayers.size();
+        info.ppEnabledLayerNames = VkValidationLayers.data();
+        info.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&messengerInfo;
     }
 
-    return instanceInfo;
+    return info;
 }
 
 VkDebugUtilsMessengerCreateInfoEXT Render::PopulateVkMessengerInfo()
 {
-    VkDebugUtilsMessengerCreateInfoEXT messengerInfo{};
+    VkDebugUtilsMessengerCreateInfoEXT info{};
 
-    if (Debug)
+    if (PetDebug)
     {
-        messengerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        messengerInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | //
-                                        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;    //
-        messengerInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |         //
-                                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |      //
-                                    VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;      //
-        messengerInfo.pfnUserCallback = DebugCallback;
-        messengerInfo.pUserData = nullptr;
+        info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | //
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;    //
+        info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |         //
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |      //
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;      //
+        info.pfnUserCallback = DebugCallback;
+        info.pUserData = nullptr;
     }
 
-    return messengerInfo;
+    return info;
+}
+
+VkWin32SurfaceCreateInfoKHR Render::PopulateVkSurface()
+{
+    VkWin32SurfaceCreateInfoKHR info{};
+
+    info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    info.hwnd = glfwGetWin32Window(Window);
+    info.hinstance = GetModuleHandle(nullptr);
+
+    return info;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL Render::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -211,7 +236,7 @@ list<const char *> Render::GetRequiredExtensions()
     auto **raw = glfwGetRequiredInstanceExtensions(&count);
     auto extensions = list<const char *>(raw, raw + count);
 
-    if (Debug)
+    if (PetDebug)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     return extensions;
@@ -295,7 +320,7 @@ bool Render::ValidateLayers(const list<const char *> &required, const list<VkLay
 
 #pragma endregion
 
-#pragma region Phisical Device Validation
+#pragma region Physical Device Validation
 
 VkPhysicalDevice Render::GetMostSuitableDevice()
 {
@@ -346,9 +371,28 @@ u32 Render::RateDevice(const VkPhysicalDevice &device)
     if (!idx.IsComplete())
         score = 0;
 
+    if (!RateExtensionSupport(device))
+        score = 0;
+
     //
 
     return score;
+}
+
+bool Render::RateExtensionSupport(const VkPhysicalDevice &device)
+{
+    u32 count;
+
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr);
+    list<VkExtensionProperties> availableExtensions(count);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &count, availableExtensions.data());
+
+    oset<str> requiredExtensions(VkDeviceExtensions.begin(), VkDeviceExtensions.end());
+
+    for (const auto &extension : availableExtensions)
+        requiredExtensions.erase(extension.extensionName);
+
+    return requiredExtensions.empty();
 }
 
 #pragma endregion
@@ -369,8 +413,18 @@ QueueFamilyIndices Render::GetAvailableQueuesFamilies(const VkPhysicalDevice &de
     {
         if (indices.IsComplete())
             break;
+
         if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
             indices.graphicsFamily = i;
+
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, VkSurface, &presentSupport);
+
+        if (presentSupport)
+            indices.presentFamily = i;
+
+        // TODO: It is possible to check for queues who have both
+        // graphics and present support for added performance
     }
 
     return indices;
@@ -390,11 +444,22 @@ VkDevice Render::GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const Que
 
     // Queue info
 
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = vkPhyDeviceIndices.graphicsFamily.value();
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    list<VkDeviceQueueCreateInfo> queueInfos;
+
+    oset<uint32_t> uniqueQueueFamilies = {VkPhyDeviceIndices.graphicsFamily.value(),
+                                          VkPhyDeviceIndices.presentFamily.value()};
+
+    for (auto queueFamily : uniqueQueueFamilies)
+    {
+        VkDeviceQueueCreateInfo queueInfo{};
+
+        queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo.queueFamilyIndex = queueFamily;
+        queueInfo.queueCount = 1;
+        queueInfo.pQueuePriorities = &queuePriority;
+
+        queueInfos.push_back(queueInfo);
+    }
 
     // Features info
 
@@ -402,21 +467,22 @@ VkDevice Render::GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const Que
 
     // Create logical device
 
-    VkDeviceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pQueueCreateInfos = &queueCreateInfo;
-    createInfo.queueCreateInfoCount = 1;
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    VkDeviceCreateInfo deviceInfo{};
+
+    deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceInfo.queueCreateInfoCount = (u32)queueInfos.size();
+    deviceInfo.pQueueCreateInfos = queueInfos.data();
+    deviceInfo.pEnabledFeatures = &deviceFeatures;
 
     // System extensions are not equal to physical device extensions
     // Asking for system extensions to an individual device can fail
     // createInfo.enabledExtensionCount = extensionNum;
     // createInfo.ppEnabledExtensionNames = extensions.data();
 
-    createInfo.enabledLayerCount = layerNum;
-    createInfo.ppEnabledLayerNames = layers.data();
+    deviceInfo.enabledLayerCount = layerNum;
+    deviceInfo.ppEnabledLayerNames = layers.data();
 
-    if (vkCreateDevice(vkPhyDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
+    if (vkCreateDevice(vkPhyDevice, &deviceInfo, nullptr, &device) != VK_SUCCESS)
         throw std::runtime_error("failed to create logical device!");
 
     return device;
@@ -430,7 +496,7 @@ VkQueue Render::GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyI
 {
     VkQueue queue{};
 
-    vkGetDeviceQueue(vkLogDevice, indices.graphicsFamily.value(), 0, &queue);
+    vkGetDeviceQueue(vkLogDevice, indices.presentFamily.value(), 0, &queue);
 
     return queue;
 }
