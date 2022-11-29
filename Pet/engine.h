@@ -1,10 +1,12 @@
 #pragma once
 
+#include "core.h"
+
 class Engine
 {
-  private:
     static Engine Instance;
 
+  private:
     bool quitRequested = false;
 
   public:

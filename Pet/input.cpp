@@ -1,4 +1,4 @@
-#include "core.h"
+#include "input.h"
 
 Input Input::Instance;
 
@@ -10,9 +10,7 @@ void Input::Run()
 {
     glfwPollEvents();
 
-    auto *window = Render::GetWindow();
-
-    if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE))
+    if (GLFW_PRESS == glfwGetKey(Render::GetWindow(), GLFW_KEY_ESCAPE))
         Engine::Quit();
 }
 

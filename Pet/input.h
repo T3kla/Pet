@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core.h"
+
 class Input
 {
     static Input Instance;

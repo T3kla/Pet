@@ -1,4 +1,4 @@
-#include "core.h"
+#include "logic.h"
 
 Logic Logic::Instance;
 
