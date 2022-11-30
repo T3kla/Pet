@@ -1,8 +1,6 @@
 #pragma once
 
-#include <functional>
-
-typedef std::function<void()> job;
+#include "core.h"
 
 class Threads
 {
@@ -19,6 +17,6 @@ class Threads
     static void Run();
     static void Exit();
 
-    static void AddJob(job job);
+    static void AddJob(del<void()> job);
     static int GetThreadNum();
 };

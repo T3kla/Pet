@@ -28,6 +28,13 @@
 #include <map>
 #include <unordered_map>
 
+#include <limits>
+
+#include <condition_variable>
+#include <mutex>
+#include <queue>
+#include <thread>
+
 using i16 = int16_t;               //
 using i32 = int32_t;               //
 using i64 = int64_t;               //
@@ -55,16 +62,13 @@ template <typename... Ts>                   //
 using omap = std::multimap<Ts...>;          //
 template <typename... Ts>                   //
 using map = std::unordered_multimap<Ts...>; //
+template <typename... Ts>                   //
+using del = std::function<Ts...>;           //
+template <typename... Ts>                   //
+using lim = std::numeric_limits<Ts...>;     //
 
 #ifdef _DEBUG
-static bool PetDebug = false;
+static bool PetDebug = true;
 #else
 static bool PetDebug = false;
 #endif
-
-#include "engine.h"
-#include "input.h"
-#include "logger.h"
-#include "logic.h"
-#include "render.h"
-#include "threads.h"

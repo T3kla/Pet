@@ -1,10 +1,4 @@
-#include "core.h"
-
-#include <condition_variable>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
+#include "threads.h"
 
 using namespace std;
 
@@ -66,7 +60,7 @@ void Threads::Exit()
     ThreadPool.clear();
 }
 
-void Threads::AddJob(job job)
+void Threads::AddJob(del<void()> job)
 {
     {
         unique_lock<mutex> lock(ThreadMutex);

@@ -7,7 +7,7 @@ class Engine
     static Engine Instance;
 
   private:
-    bool quitRequested = false;
+    static bool QuitRequested;
 
   public:
   private:

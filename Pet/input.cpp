@@ -1,5 +1,9 @@
 #include "input.h"
 
+#include "core.h"
+#include "engine.h"
+#include "render.h"
+
 Input Input::Instance;
 
 void Input::Init()

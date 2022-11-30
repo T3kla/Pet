@@ -1,6 +1,12 @@
 #include "engine.h"
+#include "input.h"
+#include "logic.h"
+#include "render.h"
+#include "threads.h"
 
 Engine Engine::Instance;
+
+bool Engine::QuitRequested = false;
 
 void Engine::Init()
 {
@@ -22,7 +28,7 @@ void Engine::Run()
     // AssetLoader::LoadAssets();
     // SceneLoader::LoadScene<SceneAudio1>();
 
-    while (!Instance.quitRequested)
+    while (!QuitRequested)
     {
         // Stasis::RefreshTime();
 
@@ -63,5 +69,5 @@ void Engine::Exit()
 
 void Engine::Quit()
 {
-    Instance.quitRequested = true;
+    QuitRequested = true;
 }

@@ -12,6 +12,13 @@ struct QueueFamilyIndices
     bool IsComplete();
 };
 
+struct SwapChainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities{};
+    list<VkSurfaceFormatKHR> formats;
+    list<VkPresentModeKHR> presentModes;
+};
+
 class Render
 {
     static Render Instance;
@@ -30,6 +37,13 @@ class Render
 
     static VkQueue VkGraphicsQueue;
     static VkSurfaceKHR VkSurface;
+
+    static VkSwapchainKHR VkCurSwapChain;
+    static VkSwapchainKHR VkOldSwapChain;
+    static list<VkImage> VkSwapChainImages;
+    static VkFormat VkSwapChainImageFormat;
+    static VkExtent2D VkSwapChainExtent;
+    static list<VkImageView> VkSwapChainImageViews;
 
   public:
   private:
@@ -60,7 +74,9 @@ class Render
 
     static VkPhysicalDevice GetMostSuitableDevice();
     static u32 RateDevice(const VkPhysicalDevice &device);
+    static bool RateAvailableQueueFamilies(const VkPhysicalDevice &device);
     static bool RateExtensionSupport(const VkPhysicalDevice &device);
+    static bool RateSwapChainDetails(const VkPhysicalDevice &device);
 
     // Queue family validation
 
@@ -68,13 +84,27 @@ class Render
 
     // Logic Device validation
 
-    static VkDevice GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const QueueFamilyIndices &vkPhyDeviceIndices,
-                                     u32 extensionNum, const list<const char *> &extensions, u32 layerNum,
-                                     const list<const char *> &layers);
+    static VkDevice GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const QueueFamilyIndices &vkPhyDeviceIndices);
 
     // Graphics queue
 
     static VkQueue GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyIndices &indices);
+
+    // SwapChain
+
+    static SwapChainSupportDetails GetSwapChainSupportDetails(const VkPhysicalDevice &device);
+    static VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const list<VkSurfaceFormatKHR> &availableFormats);
+    static VkPresentModeKHR ChooseSwapPresentMode(const list<VkPresentModeKHR> &availablePresentModes);
+    static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+    static VkSwapchainKHR GetSwapChain(VkSwapchainKHR *oldSwapChain = nullptr);
+
+    // Image views
+
+    static list<VkImageView> GetImageViews();
+
+    // Graphics pipeline
+
+    static void GetGraphicsPipeline();
 
     //
 
