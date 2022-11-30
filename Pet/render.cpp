@@ -118,6 +118,18 @@ void Render::Init()
     // Image views
 
     VkSwapChainImageViews = GetImageViews();
+
+    // Compile shaders
+
+    const char *fragPath = "shaders/shader.frag";
+    const char *vertPath = "shaders/shader.vert";
+
+    auto fragCodeCompiled = GenerateShader(fragPath, shaderc_glsl_fragment_shader);
+    auto vertCodeCompiled = GenerateShader(vertPath, shaderc_glsl_vertex_shader);
+
+    // vk::ShaderModuleCreateInfo fragmentShaderModuleCreateInfo = {};
+    // fragmentShaderModuleCreateInfo.codeSize = fragmentCodeCompiled.size() * sizeof(glm::uint);
+    // fragmentShaderModuleCreateInfo.pCode = fragmentCodeCompiled.data();
 }
 
 void Render::Run()
@@ -676,6 +688,69 @@ list<VkImageView> Render::GetImageViews()
     }
 
     return imageViews;
+}
+
+#pragma endregion
+
+#pragma region Pipeline
+
+list<char> Render::GenerateShader(str path, shaderc_shader_kind kind)
+{
+#ifdef _DEBUG
+
+    // Get the file text
+
+    auto file = std::ifstream(path + ".spv", std::ios::ate | std::ios::binary);
+    auto fileSize = (u64)file.tellg();
+    auto fileBuffer = list<char>(fileSize);
+    file.seekg(0);
+    file.read(fileBuffer.data(), fileSize);
+    file.close();
+
+    // Return the compiled shader
+
+    return fileBuffer;
+
+#else
+
+    // Get the file text
+
+    auto file = std::ifstream(path, std::ios::ate);
+    auto fileSize = (u64)file.tellg();
+    auto fileBuffer = str(fileSize, '\0');
+    file.seekg(0);
+    file.read(fileBuffer.data(), fileSize);
+    file.close();
+
+    // Compile shader
+
+    auto compiler = shaderc::Compiler();
+    auto options = shaderc::CompileOptions();
+    options.SetOptimizationLevel(shaderc_optimization_level_size);
+
+    const char *fragmentCode = "#version 450 \n layout(location = 0) out vec4 outColor; \n void main(){ } \n";
+
+    auto svCompilationResult = compiler.CompileGlslToSpv(fileBuffer.data(), kind, "shaderc_s", options);
+
+    if (svCompilationResult.GetCompilationStatus() != shaderc_compilation_status_success)
+        throw std::runtime_error("\nFailed to compile shader!");
+
+    auto compiledShader = list<char>(svCompilationResult.cbegin(), svCompilationResult.cend());
+
+    // Write compiled shader to a file
+
+    auto save = std::ofstream(path + ".spv", std::ios::binary);
+    save.write(compiledShader.data(), compiledShader.size());
+
+    // Return the compiled shader
+
+    return compiledShader;
+
+#endif
+}
+
+VkShaderModule Render::GetShaderModule(const list<char> &shader)
+{
 }
 
 #pragma endregion

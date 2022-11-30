@@ -2,6 +2,8 @@
 
 #include "core.h"
 
+#include "shaderc/shaderc.hpp"
+
 using namespace glm;
 
 struct QueueFamilyIndices
@@ -105,6 +107,8 @@ class Render
     // Graphics pipeline
 
     static void GetGraphicsPipeline();
+    static list<char> GenerateShader(str path, shaderc_shader_kind kind);
+    static VkShaderModule GetShaderModule(const list<char> &shader);
 
     //
 

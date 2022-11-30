@@ -13,6 +13,7 @@
 
 #include <glm/glm.hpp>
 
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <optional>
