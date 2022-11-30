@@ -34,9 +34,9 @@ void Engine::Run()
 
         // Travel();
 
-        Render::Run();
         Input::Run();
         Logic::Run();
+        Render::Run();
 
         // dt = Stasis::GetDelta();
         // fxCount += dt;

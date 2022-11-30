@@ -46,6 +46,18 @@ class Render
     static VkFormat VkSwapChainImageFormat;
     static VkExtent2D VkSwapChainExtent;
     static list<VkImageView> VkSwapChainImageViews;
+    static list<VkFramebuffer> VkFramesBuffer;
+
+    static VkRenderPass VkPasses;
+    static VkPipelineLayout VkPipeLayout;
+    static VkPipeline VkPipe;
+
+    static VkCommandPool VkCmdPool;
+    static VkCommandBuffer VkCmdBuffer;
+
+    static VkSemaphore ImageAvailableSemaphore;
+    static VkSemaphore RenderFinishedSemaphore;
+    static VkFence InFlightFence;
 
   public:
   private:
@@ -60,6 +72,7 @@ class Render
                                                        const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo);
     static VkDebugUtilsMessengerCreateInfoEXT PopulateVkMessengerInfo();
     static VkWin32SurfaceCreateInfoKHR PopulateVkSurface();
+    static void PopulateSyncObjects();
 
     // Extension validation
 
@@ -104,11 +117,24 @@ class Render
 
     static list<VkImageView> GetImageViews();
 
-    // Graphics pipeline
+    // Pipeline
 
-    static void GetGraphicsPipeline();
+    static VkRenderPass GetRenderPass();
+    static void GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout);
+
     static list<char> GenerateShader(str path, shaderc_shader_kind kind);
     static VkShaderModule GetShaderModule(const list<char> &shader);
+
+    // Framebuffer
+
+    static list<VkFramebuffer> GetFramesBuffer();
+
+    // Commands
+
+    static VkCommandPool GetCommandPool();
+    static VkCommandBuffer GetCommandBuffer();
+
+    static void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
 
     //
 
