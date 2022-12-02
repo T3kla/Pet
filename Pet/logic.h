@@ -2,14 +2,20 @@
 
 class Logic
 {
-    static Logic Instance;
+    // Static
 
   private:
-    Logic() = default;
-    Logic(const Logic &) = delete;
-    ~Logic() = default;
+    static Logic *_instance;
 
   public:
+    static Logic *Instance();
+
+    // Instance
+
+  public:
+    Logic();
+    ~Logic();
+
     static void Init();
     static void Run();
     static void Exit();

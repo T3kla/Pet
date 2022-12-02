@@ -1,24 +1,41 @@
 #include "engine.h"
+
 #include "input.h"
 #include "logic.h"
 #include "render.h"
 #include "threads.h"
 
-Engine Engine::Instance;
+App *App::_instance = nullptr;
 
-bool Engine::QuitRequested = false;
-
-void Engine::Init()
+App *App::Instance()
 {
-    Render::Init();
-    Logic::Init();
-    Input::Init();
-    Threads::Init();
-
-    Engine::Run();
+    return _instance;
 }
 
-void Engine::Run()
+App::App()
+{
+    if (_instance)
+        LOG("\nInstance already exists");
+
+    _instance = this;
+}
+
+App::~App()
+{
+}
+
+void App::Init()
+{
+    _threads.Init();
+
+    _render.Init();
+    _input.Init();
+    _logic.Init();
+
+    Run();
+}
+
+void App::Run()
 {
     // Stasis::RefreshTime();
 
@@ -28,15 +45,15 @@ void Engine::Run()
     // AssetLoader::LoadAssets();
     // SceneLoader::LoadScene<SceneAudio1>();
 
-    while (!QuitRequested)
+    while (!_quitRequested)
     {
         // Stasis::RefreshTime();
 
         // Travel();
 
-        Input::Run();
-        Logic::Run();
-        Render::Run();
+        _input.Run();
+        _logic.Run();
+        _render.Run();
 
         // dt = Stasis::GetDelta();
         // fxCount += dt;
@@ -56,18 +73,18 @@ void Engine::Run()
 
     // Audio::Exit();
 
-    Engine::Exit();
-    Render::Exit();
-    Logic::Exit();
-    Input::Exit();
-    Threads::Exit();
+    App::Exit();
 }
 
-void Engine::Exit()
+void App::Exit()
 {
+    _render.Exit();
+    _logic.Exit();
+    _input.Exit();
+    _threads.Exit();
 }
 
-void Engine::Quit()
+void App::Quit()
 {
-    QuitRequested = true;
+    _quitRequested = true;
 }

@@ -23,122 +23,127 @@ struct SwapChainSupportDetails
 
 class Render
 {
-    static Render Instance;
+    // Static
 
   private:
-    static GLFWwindow *Window;
-    static const char *WindowTitle;
-    static i32vec2 WindowSize;
-
-    static VkInstance VkInstance;
-    static VkDebugUtilsMessengerEXT VkMessenger;
-
-    static VkPhysicalDevice VkPhyDevice;
-    static QueueFamilyIndices VkPhyDeviceIndices;
-    static VkDevice VkLogDevice;
-
-    static VkQueue VkGraphicsQueue;
-    static VkSurfaceKHR VkSurface;
-
-    static VkSwapchainKHR VkCurSwapChain;
-    static VkSwapchainKHR VkOldSwapChain;
-    static list<VkImage> VkSwapChainImages;
-    static VkFormat VkSwapChainImageFormat;
-    static VkExtent2D VkSwapChainExtent;
-    static list<VkImageView> VkSwapChainImageViews;
-    static list<VkFramebuffer> VkFramesBuffer;
-
-    static VkRenderPass VkPasses;
-    static VkPipelineLayout VkPipeLayout;
-    static VkPipeline VkPipe;
-
-    static VkCommandPool VkCmdPool;
-    static VkCommandBuffer VkCmdBuffer;
-
-    static VkSemaphore ImageAvailableSemaphore;
-    static VkSemaphore RenderFinishedSemaphore;
-    static VkFence InFlightFence;
+    static Render *_instance;
 
   public:
-  private:
-    Render() = default;
-    Render(const Render &) = delete;
-    ~Render() = default;
+    static Render *Instance();
 
-    static GLFWwindow *InitializeGLFW();
-    static VkApplicationInfo PopulateVkAppInfo();
-    static VkInstanceCreateInfo PopulateVkInstanceInfo(const VkApplicationInfo &vkAppInfo,
-                                                       const list<const char *> &requiredExtensions,
-                                                       const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo);
-    static VkDebugUtilsMessengerCreateInfoEXT PopulateVkMessengerInfo();
-    static VkWin32SurfaceCreateInfoKHR PopulateVkSurface();
-    static void PopulateSyncObjects();
+    // Instance
+
+  private:
+    GLFWwindow *Window = nullptr;
+    const char *WindowTitle = "PetProject";
+    i32vec2 WindowSize = i32vec2(800, 600);
+
+    const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+    const list<const char *> VkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+    VkInstance VkInstance;
+    VkDebugUtilsMessengerEXT VkMessenger;
+
+    VkPhysicalDevice VkPhyDevice;
+    QueueFamilyIndices VkPhyDeviceIndices;
+    VkDevice VkLogDevice;
+
+    VkQueue VkGraphicsQueue;
+    VkSurfaceKHR VkSurface;
+
+    VkSwapchainKHR VkCurSwapChain;
+    VkSwapchainKHR VkOldSwapChain;
+    list<VkImage> VkSwapChainImages;
+    VkFormat VkSwapChainImageFormat;
+    VkExtent2D VkSwapChainExtent;
+    list<VkImageView> VkSwapChainImageViews;
+    list<VkFramebuffer> VkFramesBuffer;
+
+    VkRenderPass VkPasses;
+    VkPipelineLayout VkPipeLayout;
+    VkPipeline VkPipe;
+
+    VkCommandPool VkCmdPool;
+    VkCommandBuffer VkCmdBuffer;
+
+    VkSemaphore ImageAvailableSemaphore;
+    VkSemaphore RenderFinishedSemaphore;
+    VkFence InFlightFence;
+
+    GLFWwindow *InitializeGLFW();
+    VkApplicationInfo PopulateVkAppInfo();
+    VkInstanceCreateInfo PopulateVkInstanceInfo(const VkApplicationInfo &vkAppInfo,
+                                                const list<const char *> &requiredExtensions,
+                                                const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo);
+    VkDebugUtilsMessengerCreateInfoEXT PopulateVkMessengerInfo();
+    VkWin32SurfaceCreateInfoKHR PopulateVkSurface();
+    void PopulateSyncObjects();
 
     // Extension validation
 
-    static list<const char *> GetRequiredExtensions();
-    static list<VkExtensionProperties> GetAvailableExtensions();
-    static bool ValidateExtensions(const list<const char *> &required, const list<VkExtensionProperties> &available);
+    list<const char *> GetRequiredExtensions();
+    list<VkExtensionProperties> GetAvailableExtensions();
+    bool ValidateExtensions(const list<const char *> &required, const list<VkExtensionProperties> &available);
 
     // Layer validation
 
-    static list<VkLayerProperties> GetAvailableLayers();
-    static bool ValidateLayers(const list<const char *> &required, const list<VkLayerProperties> &available);
+    list<VkLayerProperties> GetAvailableLayers();
+    bool ValidateLayers(const list<const char *> &required, const list<VkLayerProperties> &available);
 
     // Physical Device validation
 
-    static VkPhysicalDevice GetMostSuitableDevice();
-    static u32 RateDevice(const VkPhysicalDevice &device);
-    static bool RateAvailableQueueFamilies(const VkPhysicalDevice &device);
-    static bool RateExtensionSupport(const VkPhysicalDevice &device);
-    static bool RateSwapChainDetails(const VkPhysicalDevice &device);
+    VkPhysicalDevice GetMostSuitableDevice();
+    u32 RateDevice(const VkPhysicalDevice &device);
+    bool RateAvailableQueueFamilies(const VkPhysicalDevice &device);
+    bool RateExtensionSupport(const VkPhysicalDevice &device);
+    bool RateSwapChainDetails(const VkPhysicalDevice &device);
 
     // Queue family validation
 
-    static QueueFamilyIndices GetAvailableQueuesFamilies(const VkPhysicalDevice &device);
+    QueueFamilyIndices GetAvailableQueuesFamilies(const VkPhysicalDevice &device);
 
     // Logic Device validation
 
-    static VkDevice GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const QueueFamilyIndices &vkPhyDeviceIndices);
+    VkDevice GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const QueueFamilyIndices &vkPhyDeviceIndices);
 
     // Graphics queue
 
-    static VkQueue GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyIndices &indices);
+    VkQueue GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyIndices &indices);
 
     // SwapChain
 
-    static SwapChainSupportDetails GetSwapChainSupportDetails(const VkPhysicalDevice &device);
-    static VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const list<VkSurfaceFormatKHR> &availableFormats);
-    static VkPresentModeKHR ChooseSwapPresentMode(const list<VkPresentModeKHR> &availablePresentModes);
-    static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-    static VkSwapchainKHR GetSwapChain(VkSwapchainKHR *oldSwapChain = nullptr);
+    SwapChainSupportDetails GetSwapChainSupportDetails(const VkPhysicalDevice &device);
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const list<VkSurfaceFormatKHR> &availableFormats);
+    VkPresentModeKHR ChooseSwapPresentMode(const list<VkPresentModeKHR> &availablePresentModes);
+    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+    VkSwapchainKHR GetSwapChain(VkSwapchainKHR *oldSwapChain = nullptr);
 
     // Image views
 
-    static list<VkImageView> GetImageViews();
+    list<VkImageView> GetImageViews();
 
     // Pipeline
 
-    static VkRenderPass GetRenderPass();
-    static void GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout);
+    VkRenderPass GetRenderPass();
+    void GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout);
 
-    static list<char> GenerateShader(str path, shaderc_shader_kind kind);
-    static VkShaderModule GetShaderModule(const list<char> &shader);
+    list<char> GenerateShader(str path, shaderc_shader_kind kind);
+    VkShaderModule GetShaderModule(const list<char> &shader);
 
     // Framebuffer
 
-    static list<VkFramebuffer> GetFramesBuffer();
+    list<VkFramebuffer> GetFramesBuffer();
 
     // Commands
 
-    static VkCommandPool GetCommandPool();
-    static VkCommandBuffer GetCommandBuffer();
+    VkCommandPool GetCommandPool();
+    VkCommandBuffer GetCommandBuffer();
 
-    static void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
+    void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
 
     //
 
-    static void OnWindowResize(GLFWwindow *window, int width, int height);
+    void OnWindowResize(GLFWwindow *window, int width, int height);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -146,10 +151,13 @@ class Render
                                                         void *pUserData);
 
   public:
-    static void Init();
-    static void Run();
-    static void Exit();
+    Render();
+    ~Render();
 
-    static i32vec2 GetWindowSize();
-    static GLFWwindow *GetWindow();
+    void Init();
+    void Run();
+    void Exit();
+
+    i32vec2 GetWindowSize();
+    GLFWwindow *GetWindow();
 };

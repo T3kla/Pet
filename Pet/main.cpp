@@ -1,10 +1,15 @@
 #include "engine.h"
 
+#include <exception>
+#include <iostream>
+
 int main()
 {
+    auto engine = App();
+
     try
     {
-        Engine::Init();
+        engine.Init();
     }
     catch (const std::exception &e)
     {

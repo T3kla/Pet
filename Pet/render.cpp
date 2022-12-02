@@ -1,42 +1,23 @@
 #include "render.h"
 
-Render Render::Instance;
+Render *Render::_instance;
 
-GLFWwindow *Render::Window = nullptr;
-const char *Render::WindowTitle = "PetProject";
-i32vec2 Render::WindowSize = i32vec2(800, 600);
+Render *Render::Instance()
+{
+    return _instance;
+}
 
-VkInstance Render::VkInstance;
-VkDebugUtilsMessengerEXT Render::VkMessenger;
+Render::Render()
+{
+    if (_instance)
+        LOG("\nInstance already exists");
 
-VkPhysicalDevice Render::VkPhyDevice;
-QueueFamilyIndices Render::VkPhyDeviceIndices;
-VkDevice Render::VkLogDevice;
+    _instance = this;
+}
 
-VkQueue Render::VkGraphicsQueue;
-VkSurfaceKHR Render::VkSurface;
-
-VkSwapchainKHR Render::VkCurSwapChain;
-VkSwapchainKHR Render::VkOldSwapChain;
-list<VkImage> Render::VkSwapChainImages;
-VkFormat Render::VkSwapChainImageFormat;
-VkExtent2D Render::VkSwapChainExtent;
-list<VkImageView> Render::VkSwapChainImageViews;
-
-VkRenderPass Render::VkPasses;
-VkPipelineLayout Render::VkPipeLayout;
-VkPipeline Render::VkPipe;
-
-list<VkFramebuffer> Render::VkFramesBuffer;
-VkCommandPool Render::VkCmdPool;
-VkCommandBuffer Render::VkCmdBuffer;
-
-VkSemaphore Render::ImageAvailableSemaphore;
-VkSemaphore Render::RenderFinishedSemaphore;
-VkFence Render::InFlightFence;
-
-const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
-const list<const char *> VkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+Render::~Render()
+{
+}
 
 bool QueueFamilyIndices::IsComplete()
 {
@@ -86,7 +67,7 @@ void Render::Init()
 
     // Vulkan attatch debug messenger
 
-    if (PetDebug)
+    if (IsDebug)
     {
         auto fn =
             (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VkInstance, "vkCreateDebugUtilsMessengerEXT");
@@ -199,7 +180,7 @@ void Render::Run()
 
 void Render::Exit()
 {
-    if (PetDebug)
+    if (IsDebug)
     {
         auto fn =
             (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(VkInstance, "vkDestroyDebugUtilsMessengerEXT");
@@ -281,7 +262,7 @@ VkInstanceCreateInfo Render::PopulateVkInstanceInfo(const VkApplicationInfo &vkA
     info.ppEnabledLayerNames = nullptr;
     info.pNext = nullptr;
 
-    if (PetDebug)
+    if (IsDebug)
     {
         info.enabledLayerCount = (u32)VkValidationLayers.size();
         info.ppEnabledLayerNames = VkValidationLayers.data();
@@ -295,7 +276,7 @@ VkDebugUtilsMessengerCreateInfoEXT Render::PopulateVkMessengerInfo()
 {
     VkDebugUtilsMessengerCreateInfoEXT info{};
 
-    if (PetDebug)
+    if (IsDebug)
     {
         info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | //
@@ -342,7 +323,7 @@ list<const char *> Render::GetRequiredExtensions()
     auto **raw = glfwGetRequiredInstanceExtensions(&count);
     auto extensions = list<const char *>(raw, raw + count);
 
-    if (PetDebug)
+    if (IsDebug)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     return extensions;
@@ -593,7 +574,7 @@ VkDevice Render::GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const Que
     deviceInfo.enabledExtensionCount = (u32)VkDeviceExtensions.size();
     deviceInfo.ppEnabledExtensionNames = VkDeviceExtensions.data();
 
-    if (PetDebug)
+    if (IsDebug)
     {
         deviceInfo.enabledLayerCount = (u32)VkValidationLayers.size();
         deviceInfo.ppEnabledLayerNames = VkValidationLayers.data();

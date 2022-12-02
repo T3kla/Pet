@@ -36,6 +36,8 @@
 #include <queue>
 #include <thread>
 
+#include "logger.h"
+
 using i16 = int16_t;               //
 using i32 = int32_t;               //
 using i64 = int64_t;               //
@@ -69,7 +71,7 @@ template <typename... Ts>                   //
 using lim = std::numeric_limits<Ts...>;     //
 
 #ifdef _DEBUG
-static bool PetDebug = true;
+static bool IsDebug = true;
 #else
-static bool PetDebug = false;
+static bool IsDebug = false;
 #endif

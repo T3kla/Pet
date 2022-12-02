@@ -2,15 +2,21 @@
 
 class Input
 {
-    static Input Instance;
+    // Static
 
   private:
-    Input() = default;
-    Input(const Input &) = delete;
-    ~Input() = default;
+    static Input *_instance;
 
   public:
-    static void Init();
-    static void Run();
-    static void Exit();
+    static Input *Instance();
+
+    // Instance
+
+  public:
+    Input();
+    ~Input();
+
+    void Init();
+    void Run();
+    void Exit();
 };

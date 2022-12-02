@@ -1,24 +1,38 @@
 #pragma once
 
-#include "core.h"
+#include "input.h"
+#include "logic.h"
+#include "render.h"
+#include "threads.h"
 
-class Engine
+class App
 {
-    static Engine Instance;
+    // Static
 
   private:
-    static bool QuitRequested;
+    static App *_instance;
 
   public:
+    static App *Instance();
+
+    // Instance
+
   private:
-    Engine() = default;
-    Engine(const Engine &) = delete;
-    ~Engine() = default;
+    Threads _threads;
+
+    Input _input;
+    Logic _logic;
+    Render _render;
+
+    bool _quitRequested = false;
 
   public:
-    static void Init();
-    static void Run();
-    static void Exit();
+    App();
+    ~App();
 
-    static void Quit();
+    void Init();
+    void Run();
+    void Exit();
+
+    void Quit();
 };

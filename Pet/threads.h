@@ -4,19 +4,34 @@
 
 class Threads
 {
-    static Threads Instance;
+    // Static
 
-  public:
   private:
-    Threads() = default;
-    Threads(const Threads &) = delete;
-    ~Threads() = default;
+    static Threads *_instance;
+
+    static void Loop();
 
   public:
-    static void Init();
-    static void Run();
-    static void Exit();
+    static Threads *Instance();
 
-    static void AddJob(del<void()> job);
-    static int GetThreadNum();
+    // Instance
+
+  private:
+    std::vector<std::thread> _pool;
+    int _poolSize = 0;
+    std::mutex _mutex;
+    std::condition_variable _cond;
+    std::queue<del<void()>> _jobs;
+    bool _shutdown = false;
+
+  public:
+    Threads();
+    ~Threads();
+
+    void Init();
+    void Run();
+    void Exit();
+
+    void AddJob(del<void()> job);
+    int GetThreadNum();
 };
