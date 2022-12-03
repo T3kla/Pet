@@ -8,17 +8,17 @@ using namespace glm;
 
 struct QueueFamilyIndices
 {
-    opt<uint32_t> graphicsFamily;
-    opt<uint32_t> presentFamily;
+    opt<uint32_t> _graphicsFamily;
+    opt<uint32_t> _presentFamily;
 
     bool IsComplete();
 };
 
 struct SwapChainSupportDetails
 {
-    VkSurfaceCapabilitiesKHR capabilities{};
-    list<VkSurfaceFormatKHR> formats;
-    list<VkPresentModeKHR> presentModes;
+    VkSurfaceCapabilitiesKHR _capabilities{};
+    list<VkSurfaceFormatKHR> _formats;
+    list<VkPresentModeKHR> _presentModes;
 };
 
 class Render
@@ -34,43 +34,45 @@ class Render
     // Instance
 
   private:
-    GLFWwindow *Window = nullptr;
-    const char *WindowTitle = "PetProject";
-    i32vec2 WindowSize = i32vec2(800, 600);
+    GLFWwindow *_window = nullptr;
+    const char *_windowTitle = "PetProject";
+    i32vec2 _windowSize = i32vec2(800, 600);
 
-    const list<const char *> VkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
-    const list<const char *> VkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    const list<const char *> _vkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+    const list<const char *> _vkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-    VkInstance VkInstance;
-    VkDebugUtilsMessengerEXT VkMessenger;
+    VkInstance _vkInstance;
+    VkDebugUtilsMessengerEXT _vkMessenger;
 
-    VkPhysicalDevice VkPhyDevice;
-    QueueFamilyIndices VkPhyDeviceIndices;
-    VkDevice VkLogDevice;
+    VkPhysicalDevice _vkPhyDevice;
+    QueueFamilyIndices _vkPhyDeviceIndices;
+    VkDevice _vkLogDevice;
 
-    VkQueue VkGraphicsQueue;
-    VkSurfaceKHR VkSurface;
+    VkQueue _vkGraphicsQueue;
+    VkSurfaceKHR _vkSurface;
 
-    VkSwapchainKHR VkCurSwapChain;
-    VkSwapchainKHR VkOldSwapChain;
-    list<VkImage> VkSwapChainImages;
-    VkFormat VkSwapChainImageFormat;
-    VkExtent2D VkSwapChainExtent;
-    list<VkImageView> VkSwapChainImageViews;
-    list<VkFramebuffer> VkFramesBuffer;
+    VkSwapchainKHR _vkCurSwapChain;
+    VkSwapchainKHR _vkOldSwapChain;
+    list<VkImage> _vkSwapChainImages;
+    VkFormat _vkSwapChainImageFormat;
+    VkExtent2D _vkSwapChainExtent;
+    list<VkImageView> _vkSwapChainImageViews;
+    list<VkFramebuffer> _vkFramesBuffer;
 
-    VkRenderPass VkPasses;
-    VkPipelineLayout VkPipeLayout;
-    VkPipeline VkPipe;
+    VkRenderPass _vkPasses;
+    VkPipelineLayout _vkPipeLayout;
+    VkPipeline _vkPipe;
 
-    VkCommandPool VkCmdPool;
-    VkCommandBuffer VkCmdBuffer;
+    VkCommandPool _vkCmdPool;
 
-    VkSemaphore ImageAvailableSemaphore;
-    VkSemaphore RenderFinishedSemaphore;
-    VkFence InFlightFence;
+    list<VkCommandBuffer> _vkCmdBuffers;
+    list<VkSemaphore> _imageAvailableSemaphores;
+    list<VkSemaphore> _renderFinishedSemaphores;
+    list<VkFence> _inFlightFences;
+    u32 _curFrame;
 
     GLFWwindow *InitializeGLFW();
+
     VkApplicationInfo PopulateVkAppInfo();
     VkInstanceCreateInfo PopulateVkInstanceInfo(const VkApplicationInfo &vkAppInfo,
                                                 const list<const char *> &requiredExtensions,
@@ -137,7 +139,7 @@ class Render
     // Commands
 
     VkCommandPool GetCommandPool();
-    VkCommandBuffer GetCommandBuffer();
+    list<VkCommandBuffer> GetCommandBuffers();
 
     void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
 
