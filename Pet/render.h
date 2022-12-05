@@ -78,6 +78,7 @@ class Render
     VkExtent2D _vkSwapChainExtent;
     list<VkImageView> _vkImageViews;
     list<VkFramebuffer> _vkFramesBuffer;
+    bool _framebufferResized = false;
     VkRenderPass _vkRenderPass;
     VkPipelineLayout _vkPipeLayout;
     VkPipeline _vkPipe;
@@ -148,7 +149,7 @@ class Render
 
     //
 
-    void OnWindowResize(GLFWwindow *window, int width, int height);
+    static void OnWindowResize(GLFWwindow *window, int width, int height);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,

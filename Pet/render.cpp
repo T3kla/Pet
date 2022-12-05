@@ -1,7 +1,5 @@
 #include "render.h"
 
-constexpr u32 MAX_FRAMES_IN_FLIGHT = 2;
-
 Render *Render::_instance;
 
 Render *Render::Instance()
@@ -80,11 +78,24 @@ void Render::Init()
 void Render::Run()
 {
     vkWaitForFences(_vkLogDevice, 1, &_frames.fences[_frames.current], VK_TRUE, UINT64_MAX);
-    vkResetFences(_vkLogDevice, 1, &_frames.fences[_frames.current]);
 
     u32 idx;
-    vkAcquireNextImageKHR(_vkLogDevice, _vkCurSwapChain, UINT64_MAX, _frames.imgSemaphores[_frames.current],
-                          VK_NULL_HANDLE, &idx);
+    VkResult result;
+
+    result = vkAcquireNextImageKHR(_vkLogDevice, _vkCurSwapChain, UINT64_MAX, _frames.imgSemaphores[_frames.current],
+                                   VK_NULL_HANDLE, &idx);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        RecreateSwapChain();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        throw std::runtime_error("\nFailed to acquire swap chain image!");
+    }
+
+    vkResetFences(_vkLogDevice, 1, &_frames.fences[_frames.current]);
 
     vkResetCommandBuffer(_frames.cmdBuffers[_frames.current], 0);
     RecordCommandBuffer(_frames.cmdBuffers[_frames.current], idx);
@@ -119,9 +130,19 @@ void Render::Run()
     presentInfo.pImageIndices = &idx;
     presentInfo.pResults = nullptr; // Optional
 
-    vkQueuePresentKHR(_vkGraphicsQueue, &presentInfo);
+    result = vkQueuePresentKHR(_vkGraphicsQueue, &presentInfo);
 
-    _frames.current = (_frames.current + 1) % MAX_FRAMES_IN_FLIGHT;
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _framebufferResized)
+    {
+        _framebufferResized = false;
+        RecreateSwapChain();
+    }
+    else if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to present swap chain image!");
+    }
+
+    _frames.current = (_frames.current + 1) % _frames.size;
 }
 
 void Render::Exit()
@@ -142,9 +163,13 @@ void Render::VkCleanup()
 
     vkDeviceWaitIdle(_vkLogDevice);
 
-    VkCleanupSwapChain();
+    for (auto const &imageView : _vkImageViews)
+        vkDestroyImageView(_vkLogDevice, imageView, nullptr);
+    for (auto const &framebuffer : _vkFramesBuffer)
+        vkDestroyFramebuffer(_vkLogDevice, framebuffer, nullptr);
+    vkDestroySwapchainKHR(_vkLogDevice, _vkCurSwapChain, nullptr);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (size_t i = 0; i < _frames.size; i++)
     {
         vkDestroySemaphore(_vkLogDevice, _frames.rndSemaphores[i], nullptr);
         vkDestroySemaphore(_vkLogDevice, _frames.imgSemaphores[i], nullptr);
@@ -165,13 +190,6 @@ void Render::VkCleanup()
 
 void Render::VkCleanupSwapChain()
 {
-    for (auto const &imageView : _vkImageViews)
-        vkDestroyImageView(_vkLogDevice, imageView, nullptr);
-
-    for (auto const &framebuffer : _vkFramesBuffer)
-        vkDestroyFramebuffer(_vkLogDevice, framebuffer, nullptr);
-
-    vkDestroySwapchainKHR(_vkLogDevice, _vkCurSwapChain, nullptr);
 }
 
 GLFWwindow *Render::InitializeGLFW()
@@ -180,9 +198,11 @@ GLFWwindow *Render::InitializeGLFW()
         throw std::runtime_error("\nGLFW Panicked!");
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     auto window = glfwCreateWindow(_windowSize.x, _windowSize.y, _windowTitle, nullptr, nullptr);
+
+    glfwSetFramebufferSizeCallback(window, OnWindowResize);
 
     if (glfwVulkanSupported() == 0)
         throw std::runtime_error("\nGLFW Vulkan Not Supported!");
@@ -663,12 +683,22 @@ void Render::GetSwapChain(VkSwapchainKHR *cur, VkSwapchainKHR *old)
 
 void Render::RecreateSwapChain()
 {
-    _vkOldSwapChain = _vkCurSwapChain;
-    GetSwapChain(&_vkCurSwapChain, &_vkOldSwapChain);
+    while (_windowSize.x == 0 || _windowSize.y == 0)
+    {
+        glfwGetFramebufferSize(_window, &_windowSize.x, &_windowSize.y);
+        glfwWaitEvents();
+    }
 
+    _vkOldSwapChain = _vkCurSwapChain;
+
+    GetSwapChain(&_vkCurSwapChain, &_vkOldSwapChain);
     vkDeviceWaitIdle(_vkLogDevice);
 
-    VkCleanupSwapChain();
+    for (auto const &imageView : _vkImageViews)
+        vkDestroyImageView(_vkLogDevice, imageView, nullptr);
+    for (auto const &framebuffer : _vkFramesBuffer)
+        vkDestroyFramebuffer(_vkLogDevice, framebuffer, nullptr);
+    vkDestroySwapchainKHR(_vkLogDevice, _vkOldSwapChain, nullptr);
 
     GetImageViews(_vkImageViews);
     GetFramesBuffer(_vkFramesBuffer);
@@ -1090,7 +1120,8 @@ void Render::RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx)
 
 void Render::OnWindowResize(GLFWwindow *window, int width, int height)
 {
-    _windowSize = vec2(width, height);
+    _instance->_framebufferResized = true;
+    _instance->_windowSize = vec2(width, height);
 }
 
 i32vec2 Render::GetWindowSize()
