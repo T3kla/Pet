@@ -56,4 +56,6 @@ template <typename List> void Log(const char *file, int line, const LogData<List
 
 #ifdef _DEBUG
 #define LOG(x) (Logger::Log(__FILENAME__, __LINE__, Logger::LogData<Logger::None>() << x))
+#else
+#define LOG(x)
 #endif

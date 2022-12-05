@@ -21,6 +21,26 @@ struct SwapChainSupportDetails
     list<VkPresentModeKHR> _presentModes;
 };
 
+struct FramesInFlight
+{
+    list<VkCommandBuffer> cmdBuffers;
+    list<VkSemaphore> imgSemaphores; // image available
+    list<VkSemaphore> rndSemaphores; // render finished
+    list<VkFence> fences;            // sync with cpu
+    u32 current = 0;
+    u32 size = 0;
+
+    FramesInFlight() = default;
+    FramesInFlight(const u32 &maxFramesInFlight = 2)
+    {
+        cmdBuffers.resize(maxFramesInFlight);
+        imgSemaphores.resize(maxFramesInFlight);
+        rndSemaphores.resize(maxFramesInFlight);
+        fences.resize(maxFramesInFlight);
+        size = maxFramesInFlight;
+    }
+};
+
 class Render
 {
     // Static
@@ -42,44 +62,33 @@ class Render
     const list<const char *> _vkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     VkInstance _vkInstance;
+    VkInstanceCreateInfo _vkInstanceInfo;
+    VkApplicationInfo _vkAppInfo;
     VkDebugUtilsMessengerEXT _vkMessenger;
-
+    VkDebugUtilsMessengerCreateInfoEXT _vkMessengerInfo;
     VkPhysicalDevice _vkPhyDevice;
     QueueFamilyIndices _vkPhyDeviceIndices;
     VkDevice _vkLogDevice;
-
     VkQueue _vkGraphicsQueue;
     VkSurfaceKHR _vkSurface;
-
     VkSwapchainKHR _vkCurSwapChain;
     VkSwapchainKHR _vkOldSwapChain;
     list<VkImage> _vkSwapChainImages;
     VkFormat _vkSwapChainImageFormat;
     VkExtent2D _vkSwapChainExtent;
-    list<VkImageView> _vkSwapChainImageViews;
+    list<VkImageView> _vkImageViews;
     list<VkFramebuffer> _vkFramesBuffer;
-
-    VkRenderPass _vkPasses;
+    VkRenderPass _vkRenderPass;
     VkPipelineLayout _vkPipeLayout;
     VkPipeline _vkPipe;
-
     VkCommandPool _vkCmdPool;
-
-    list<VkCommandBuffer> _vkCmdBuffers;
-    list<VkSemaphore> _imageAvailableSemaphores;
-    list<VkSemaphore> _renderFinishedSemaphores;
-    list<VkFence> _inFlightFences;
-    u32 _curFrame;
+    FramesInFlight _frames = FramesInFlight(2);
 
     GLFWwindow *InitializeGLFW();
 
-    VkApplicationInfo PopulateVkAppInfo();
-    VkInstanceCreateInfo PopulateVkInstanceInfo(const VkApplicationInfo &vkAppInfo,
-                                                const list<const char *> &requiredExtensions,
-                                                const VkDebugUtilsMessengerCreateInfoEXT &messengerInfo);
-    VkDebugUtilsMessengerCreateInfoEXT PopulateVkMessengerInfo();
-    VkWin32SurfaceCreateInfoKHR PopulateVkSurface();
-    void PopulateSyncObjects();
+    void PopulateVkAppInfo(VkApplicationInfo &info);
+    void PopulateVkMessengerInfo(VkDebugUtilsMessengerCreateInfoEXT &info);
+    void AttatchDebugMessenger();
 
     // Extension validation
 
@@ -92,54 +101,48 @@ class Render
     list<VkLayerProperties> GetAvailableLayers();
     bool ValidateLayers(const list<const char *> &required, const list<VkLayerProperties> &available);
 
-    // Physical Device validation
+    // Instance
 
-    VkPhysicalDevice GetMostSuitableDevice();
+    void PopulateVkInstanceInfo(VkInstanceCreateInfo &info, const list<const char *> &requiredExtensions);
+    void GetVkInstance(VkInstance &instance);
+
+    void GetSurface(VkSurfaceKHR &surface);
+
+    void GetMostSuitableDevice(VkPhysicalDevice &device);
     u32 RateDevice(const VkPhysicalDevice &device);
     bool RateAvailableQueueFamilies(const VkPhysicalDevice &device);
     bool RateExtensionSupport(const VkPhysicalDevice &device);
     bool RateSwapChainDetails(const VkPhysicalDevice &device);
 
-    // Queue family validation
+    void GetAvailableQueuesFamilies(QueueFamilyIndices &indices, const VkPhysicalDevice &device);
 
-    QueueFamilyIndices GetAvailableQueuesFamilies(const VkPhysicalDevice &device);
+    //
 
-    // Logic Device validation
+    void GetLogicalDevice(VkDevice &device);
+    void GetGraphicsQueue(VkQueue &queue);
 
-    VkDevice GetLogicalDevice(const VkPhysicalDevice &vkPhyDevice, const QueueFamilyIndices &vkPhyDeviceIndices);
-
-    // Graphics queue
-
-    VkQueue GetGraphicsQueue(const VkDevice &vkLogDevice, const QueueFamilyIndices &indices);
-
-    // SwapChain
+    void GetSwapChain(VkSwapchainKHR *cur, VkSwapchainKHR *old = nullptr);
+    void RecreateSwapChain();
 
     SwapChainSupportDetails GetSwapChainSupportDetails(const VkPhysicalDevice &device);
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const list<VkSurfaceFormatKHR> &availableFormats);
     VkPresentModeKHR ChooseSwapPresentMode(const list<VkPresentModeKHR> &availablePresentModes);
     VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-    VkSwapchainKHR GetSwapChain(VkSwapchainKHR *oldSwapChain = nullptr);
 
-    // Image views
+    void GetImageViews(list<VkImageView> &views);
 
-    list<VkImageView> GetImageViews();
-
-    // Pipeline
-
-    VkRenderPass GetRenderPass();
+    void GetRenderPass(VkRenderPass &pass);
     void GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout);
 
     list<char> GenerateShader(str path, shaderc_shader_kind kind);
     VkShaderModule GetShaderModule(const list<char> &shader);
 
-    // Framebuffer
-
-    list<VkFramebuffer> GetFramesBuffer();
+    void GetFramesBuffer(list<VkFramebuffer> &buffer);
 
     // Commands
 
-    VkCommandPool GetCommandPool();
-    list<VkCommandBuffer> GetCommandBuffers();
+    void GetCommandPool(VkCommandPool &pool);
+    void PopulateFrames(FramesInFlight &frames);
 
     void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
 
@@ -151,6 +154,9 @@ class Render
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
                                                         void *pUserData);
+
+    void VkCleanup();
+    void VkCleanupSwapChain();
 
   public:
     Render();
