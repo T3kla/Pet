@@ -51,8 +51,8 @@ using str = std::string;           //
 
 template <typename... Ts>                   //
 using opt = std::optional<Ts...>;           //
-template <typename... Ts>                   //
-using array = std::array<Ts...>;            //
+template <typename Ts, size_t Ta>           //
+using arr = std::array<Ts, Ta>;             //
 template <typename... Ts>                   //
 using list = std::vector<Ts...>;            //
 template <typename... Ts>                   //

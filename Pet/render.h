@@ -1,3 +1,4 @@
+// ReSharper disable All
 #pragma once
 
 #include "core.h"
@@ -6,27 +7,56 @@
 
 using namespace glm;
 
+struct Vertex
+{
+    vec2 pos;
+    vec3 color;
+
+    static VkVertexInputBindingDescription GetBindingDescription()
+    {
+        VkVertexInputBindingDescription desc{};
+        desc.binding = 0;
+        desc.stride = sizeof(Vertex);
+        desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        return desc;
+    }
+
+    static arr<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+    {
+        arr<VkVertexInputAttributeDescription, 2> desc{};
+        desc[0].binding = 0;
+        desc[0].location = 0;
+        desc[0].format = VK_FORMAT_R32G32_SFLOAT;
+        desc[0].offset = offsetof(Vertex, pos);
+        desc[1].binding = 0;
+        desc[1].location = 1;
+        desc[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        desc[1].offset = offsetof(Vertex, color);
+        return desc;
+    }
+};
+
 struct QueueFamilyIndices
 {
-    opt<uint32_t> _graphicsFamily;
-    opt<uint32_t> _presentFamily;
+    opt<uint32_t> graphicsFamily;
+    opt<uint32_t> presentFamily;
 
-    bool IsComplete();
+    bool IsComplete() const;
 };
 
 struct SwapChainSupportDetails
 {
-    VkSurfaceCapabilitiesKHR _capabilities{};
-    list<VkSurfaceFormatKHR> _formats;
-    list<VkPresentModeKHR> _presentModes;
+    VkSurfaceCapabilitiesKHR capabilities{};
+    list<VkSurfaceFormatKHR> formats;
+    list<VkPresentModeKHR> presentModes;
 };
 
 struct FramesInFlight
 {
-    list<VkCommandBuffer> cmdBuffers;
-    list<VkSemaphore> imgSemaphores; // image available
-    list<VkSemaphore> rndSemaphores; // render finished
-    list<VkFence> fences;            // sync with cpu
+    list<VkCommandBuffer> cmdBuffers; // draw commands containers
+    list<VkSemaphore> imgSemaphores;  // image available
+    list<VkSemaphore> rndSemaphores;  // render finished
+    list<VkFence> fences;             // sync with cpu
     u32 current = 0;
     u32 size = 0;
 
@@ -61,35 +91,42 @@ class Render
     const list<const char *> _vkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
     const list<const char *> _vkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-    VkInstance _vkInstance;
-    VkInstanceCreateInfo _vkInstanceInfo;
-    VkApplicationInfo _vkAppInfo;
-    VkDebugUtilsMessengerEXT _vkMessenger;
-    VkDebugUtilsMessengerCreateInfoEXT _vkMessengerInfo;
-    VkPhysicalDevice _vkPhyDevice;
+    VkInstance _vkInstance{};
+    VkInstanceCreateInfo _vkInstanceInfo{};
+    VkApplicationInfo _vkAppInfo{};
+    VkDebugUtilsMessengerEXT _vkMessenger{};
+    VkDebugUtilsMessengerCreateInfoEXT _vkMessengerInfo{};
+    VkPhysicalDevice _vkPhyDevice{};
     QueueFamilyIndices _vkPhyDeviceIndices;
-    VkDevice _vkLogDevice;
-    VkQueue _vkGraphicsQueue;
-    VkSurfaceKHR _vkSurface;
-    VkSwapchainKHR _vkCurSwapChain;
-    VkSwapchainKHR _vkOldSwapChain;
-    list<VkImage> _vkSwapChainImages;
-    VkFormat _vkSwapChainImageFormat;
-    VkExtent2D _vkSwapChainExtent;
+    VkDevice _vkLogDevice{};
+    VkQueue _vkGraphicsQueue{};
+    VkSurfaceKHR _vkSurface{};
+    VkSwapchainKHR _vkCurSwapChain{};
+    VkSwapchainKHR _vkOldSwapChain{};
+    list<VkImage> _vkSwapChainImages{};
+    VkFormat _vkSwapChainImageFormat{};
+    VkExtent2D _vkSwapChainExtent{};
     list<VkImageView> _vkImageViews;
     list<VkFramebuffer> _vkFramesBuffer;
     bool _framebufferResized = false;
-    VkRenderPass _vkRenderPass;
-    VkPipelineLayout _vkPipeLayout;
-    VkPipeline _vkPipe;
-    VkCommandPool _vkCmdPool;
+    VkBuffer _vkVertexBuffer{};
+    VkDeviceMemory _vkVertexMemory{};
+    VkRenderPass _vkRenderPass{};
+    VkPipelineLayout _vkPipeLayout{};
+    VkPipeline _vkPipe{};
+    VkCommandPool _vkCmdPool{};
     FramesInFlight _frames = FramesInFlight(2);
+
+    const list<Vertex> _vertices = {          //
+        {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},  //
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},   //
+        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}}; //
 
     GLFWwindow *InitializeGLFW();
 
     void PopulateVkAppInfo(VkApplicationInfo &info);
     void PopulateVkMessengerInfo(VkDebugUtilsMessengerCreateInfoEXT &info);
-    void AttatchDebugMessenger();
+    void AttachDebugMessenger();
 
     // Extension validation
 
@@ -139,8 +176,7 @@ class Render
     VkShaderModule GetShaderModule(const list<char> &shader);
 
     void GetFramesBuffer(list<VkFramebuffer> &buffer);
-
-    // Commands
+    void GetVertexBuffer(VkBuffer &buffer, VkDeviceMemory &memory);
 
     void GetCommandPool(VkCommandPool &pool);
     void PopulateFrames(FramesInFlight &frames);
@@ -155,6 +191,8 @@ class Render
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
                                                         void *pUserData);
+
+    u32 FindMemoryType(const u32 &typeFilter, const VkMemoryPropertyFlags &properties);
 
     void VkCleanup();
     void VkCleanupSwapChain();

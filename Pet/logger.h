@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <string.h>
 
 namespace Logger
 {
@@ -22,15 +21,15 @@ template <typename List> struct LogData
 };
 
 template <typename Begin, typename Value>
-LogData<Pair<Begin, const Value &>> operator<<(LogData<Begin> begin, const Value &value)
+LogData<Pair<Begin, const Value &>> operator<<(LogData<Begin> lhs, const Value &rhs)
 {
-    return {{begin.list, value}};
+    return {{lhs.list, rhs}};
 }
 
 template <typename Begin, size_t n>
-LogData<Pair<Begin, const char *>> operator<<(LogData<Begin> begin, const char (&value)[n])
+LogData<Pair<Begin, const char *>> operator<<(LogData<Begin> lhs, const char (&rhs)[n])
 {
-    return {{begin.list, value}};
+    return {{lhs.list, rhs}};
 }
 
 inline void PrintList(std::ostream &os, None)

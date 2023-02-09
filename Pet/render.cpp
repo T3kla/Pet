@@ -1,3 +1,4 @@
+// ReSharper disable All
 #include "render.h"
 
 Render *Render::_instance;
@@ -15,13 +16,11 @@ Render::Render()
     _instance = this;
 }
 
-Render::~Render()
-{
-}
+Render::~Render() = default;
 
-bool QueueFamilyIndices::IsComplete()
+bool QueueFamilyIndices::IsComplete() const
 {
-    return _graphicsFamily.has_value() && _presentFamily.has_value();
+    return graphicsFamily.has_value() && presentFamily.has_value();
 }
 
 void Render::Init()
@@ -59,7 +58,7 @@ void Render::Init()
     PopulateVkInstanceInfo(_vkInstanceInfo, requiredExtensions);
     GetVkInstance(_vkInstance);
 
-    AttatchDebugMessenger();
+    AttachDebugMessenger();
     GetSurface(_vkSurface);
 
     GetMostSuitableDevice(_vkPhyDevice);
@@ -72,6 +71,7 @@ void Render::Init()
     GetPipeline(_vkPipe, _vkPipeLayout);
     GetFramesBuffer(_vkFramesBuffer);
     GetCommandPool(_vkCmdPool);
+    GetVertexBuffer(_vkVertexBuffer, _vkVertexMemory);
     PopulateFrames(_frames);
 }
 
@@ -169,6 +169,9 @@ void Render::VkCleanup()
         vkDestroyFramebuffer(_vkLogDevice, framebuffer, nullptr);
     vkDestroySwapchainKHR(_vkLogDevice, _vkCurSwapChain, nullptr);
 
+    vkDestroyBuffer(_vkLogDevice, _vkVertexBuffer, nullptr);
+    vkFreeMemory(_vkLogDevice, _vkVertexMemory, nullptr);
+
     for (size_t i = 0; i < _frames.size; i++)
     {
         vkDestroySemaphore(_vkLogDevice, _frames.rndSemaphores[i], nullptr);
@@ -265,7 +268,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL Render::DebugCallback(VkDebugUtilsMessageSeverity
     return VK_FALSE;
 }
 
-void Render::AttatchDebugMessenger()
+void Render::AttachDebugMessenger()
 {
     if (!IsDebug)
         return;
@@ -481,8 +484,8 @@ void Render::GetAvailableQueuesFamilies(QueueFamilyIndices &indices, const VkPhy
     {
         if (flag & 0b01 && flag & 0b10)
         {
-            indices._graphicsFamily = index;
-            indices._presentFamily = index;
+            indices.graphicsFamily = index;
+            indices.presentFamily = index;
             break;
         }
     }
@@ -510,7 +513,7 @@ bool Render::RateExtensionSupport(const VkPhysicalDevice &device)
 bool Render::RateSwapChainDetails(const VkPhysicalDevice &device)
 {
     auto details = GetSwapChainSupportDetails(device);
-    return !details._formats.empty() && !details._presentModes.empty();
+    return !details.formats.empty() && !details.presentModes.empty();
 }
 
 #pragma endregion
@@ -525,8 +528,8 @@ void Render::GetLogicalDevice(VkDevice &device)
 
     list<VkDeviceQueueCreateInfo> queueInfos;
 
-    oset<uint32_t> uniqueQueueFamilies = {_vkPhyDeviceIndices._graphicsFamily.value(),
-                                          _vkPhyDeviceIndices._presentFamily.value()};
+    oset<uint32_t> uniqueQueueFamilies = {_vkPhyDeviceIndices.graphicsFamily.value(),
+                                          _vkPhyDeviceIndices.presentFamily.value()};
 
     for (auto const &queueFamily : uniqueQueueFamilies)
     {
@@ -572,25 +575,25 @@ void Render::GetLogicalDevice(VkDevice &device)
 
 void Render::GetGraphicsQueue(VkQueue &queue)
 {
-    vkGetDeviceQueue(_vkLogDevice, _vkPhyDeviceIndices._presentFamily.value(), 0, &queue);
+    vkGetDeviceQueue(_vkLogDevice, _vkPhyDeviceIndices.presentFamily.value(), 0, &queue);
 }
 
 SwapChainSupportDetails Render::GetSwapChainSupportDetails(const VkPhysicalDevice &device)
 {
     SwapChainSupportDetails details;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _vkSurface, &details._capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _vkSurface, &details.capabilities);
 
     u32 count;
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, _vkSurface, &count, nullptr);
-    details._formats.resize(count);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, _vkSurface, &count, details._formats.data());
+    details.formats.resize(count);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, _vkSurface, &count, details.formats.data());
 
     count = 0;
 
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, _vkSurface, &count, nullptr);
-    details._presentModes.resize(count);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, _vkSurface, &count, details._presentModes.data());
+    details.presentModes.resize(count);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, _vkSurface, &count, details.presentModes.data());
 
     return details;
 }
@@ -633,11 +636,11 @@ VkExtent2D Render::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities
 void Render::GetSwapChain(VkSwapchainKHR *cur, VkSwapchainKHR *old)
 {
     auto swapChainSupport = GetSwapChainSupportDetails(_vkPhyDevice);
-    auto surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport._formats);
-    auto presentMode = ChooseSwapPresentMode(swapChainSupport._presentModes);
-    auto extent = ChooseSwapExtent(swapChainSupport._capabilities);
+    auto surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
+    auto presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
+    auto extent = ChooseSwapExtent(swapChainSupport.capabilities);
 
-    u32 imageCount = swapChainSupport._capabilities.minImageCount + 1;
+    u32 imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -651,10 +654,9 @@ void Render::GetSwapChain(VkSwapchainKHR *cur, VkSwapchainKHR *old)
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    u32 queueFamilyIndices[] = {_vkPhyDeviceIndices._graphicsFamily.value(),
-                                _vkPhyDeviceIndices._presentFamily.value()};
+    u32 queueFamilyIndices[] = {_vkPhyDeviceIndices.graphicsFamily.value(), _vkPhyDeviceIndices.presentFamily.value()};
 
-    if (_vkPhyDeviceIndices._graphicsFamily != _vkPhyDeviceIndices._presentFamily)
+    if (_vkPhyDeviceIndices.graphicsFamily != _vkPhyDeviceIndices.presentFamily)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
@@ -667,7 +669,7 @@ void Render::GetSwapChain(VkSwapchainKHR *cur, VkSwapchainKHR *old)
         createInfo.pQueueFamilyIndices = nullptr; // Optional
     }
 
-    createInfo.preTransform = swapChainSupport._capabilities.currentTransform;
+    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
@@ -820,12 +822,15 @@ void Render::GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout)
     dynamicState.dynamicStateCount = (u32)dynStates.size();
     dynamicState.pDynamicStates = dynStates.data();
 
+    auto bindingDescription = Vertex::GetBindingDescription();
+    auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription; // Optional
+    vertexInputInfo.vertexAttributeDescriptionCount = (u32)attributeDescriptions.size();
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -1006,7 +1011,7 @@ VkShaderModule Render::GetShaderModule(const list<char> &shader)
 
 #pragma endregion
 
-#pragma region Frames buffer
+#pragma region Buffer
 
 void Render::GetFramesBuffer(list<VkFramebuffer> &buffer)
 {
@@ -1030,6 +1035,37 @@ void Render::GetFramesBuffer(list<VkFramebuffer> &buffer)
     }
 }
 
+void Render::GetVertexBuffer(VkBuffer &buffer, VkDeviceMemory &memory)
+{
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(_vertices[0]) * _vertices.size();
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(_vkLogDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+        throw std::runtime_error("\nFailed to create vertex buffer!");
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(_vkLogDevice, buffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(
+        memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    if (vkAllocateMemory(_vkLogDevice, &allocInfo, nullptr, &memory) != VK_SUCCESS)
+        throw std::runtime_error("\nFailed to allocate vertex buffer memory!");
+
+    vkBindBufferMemory(_vkLogDevice, buffer, memory, 0);
+
+    void *data;
+    vkMapMemory(_vkLogDevice, memory, 0, bufferInfo.size, 0, &data);
+    memcpy(data, _vertices.data(), (size_t)bufferInfo.size);
+    vkUnmapMemory(_vkLogDevice, memory);
+}
+
 #pragma endregion
 
 #pragma region Commands
@@ -1039,7 +1075,7 @@ void Render::GetCommandPool(VkCommandPool &pool)
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = _vkPhyDeviceIndices._graphicsFamily.value();
+    poolInfo.queueFamilyIndex = _vkPhyDeviceIndices.graphicsFamily.value();
 
     if (vkCreateCommandPool(_vkLogDevice, &poolInfo, nullptr, &pool) != VK_SUCCESS)
         throw std::runtime_error("\nFailed to create command pool!");
@@ -1095,6 +1131,10 @@ void Render::RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx)
 
     vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vkPipe);
 
+    VkBuffer vertexBuffers[] = {_vkVertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(buffer, 0, 1, vertexBuffers, offsets);
+
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -1109,11 +1149,27 @@ void Render::RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx)
     scissor.extent = _vkSwapChainExtent;
     vkCmdSetScissor(buffer, 0, 1, &scissor);
 
-    vkCmdDraw(buffer, 3, 1, 0, 0);
+    vkCmdDraw(buffer, (u32)_vertices.size(), 1, 0, 0);
     vkCmdEndRenderPass(buffer);
 
     if (vkEndCommandBuffer(buffer) != VK_SUCCESS)
         throw std::runtime_error("\nFailed to record command buffer!");
+}
+
+#pragma endregion
+
+#pragma region Memory
+
+u32 Render::FindMemoryType(const u32 &typeFilter, const VkMemoryPropertyFlags &flags)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(_vkPhyDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & flags) == flags)
+            return i;
+
+    throw std::runtime_error("\nFailed to find suitable memory type!");
 }
 
 #pragma endregion

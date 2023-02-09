@@ -14,6 +14,7 @@ App *App::Instance()
 
 App::App()
 {
+    LOG("\nInstance already exists \"%i\"", 3, "!", 29.f);
     if (_instance)
         LOG("\nInstance already exists");
 
