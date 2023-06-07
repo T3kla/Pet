@@ -46,31 +46,20 @@ using u8 = std::uint8_t;
 using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using u64 = std::uint64_t;
-using job = std::function<void()>; //
-using str = std::string;           //
+using job = std::function<void()>;
+using str = std::string;
 
-template <typename... Ts>                   //
-using opt = std::optional<Ts...>;           //
-template <typename Ts, size_t Ta>           //
-using arr = std::array<Ts, Ta>;             //
-template <typename... Ts>                   //
-using list = std::vector<Ts...>;            //
-template <typename... Ts>                   //
-using oset = std::set<Ts...>;               //
-template <typename... Ts>                   //
-using set = std::unordered_set<Ts...>;      //
-template <typename... Ts>                   //
-using odic = std::map<Ts...>;               //
-template <typename... Ts>                   //
-using dic = std::unordered_map<Ts...>;      //
-template <typename... Ts>                   //
-using omap = std::multimap<Ts...>;          //
-template <typename... Ts>                   //
-using map = std::unordered_multimap<Ts...>; //
-template <typename... Ts>                   //
-using del = std::function<Ts...>;           //
-template <typename... Ts>                   //
-using lim = std::numeric_limits<Ts...>;     //
+template <typename... Ts> using opt = std::optional<Ts...>;
+template <typename Ts, size_t Ta> using arr = std::array<Ts, Ta>;
+template <typename... Ts> using list = std::vector<Ts...>;
+template <typename... Ts> using oset = std::set<Ts...>;
+template <typename... Ts> using set = std::unordered_set<Ts...>;
+template <typename... Ts> using odic = std::map<Ts...>;
+template <typename... Ts> using dic = std::unordered_map<Ts...>;
+template <typename... Ts> using omap = std::multimap<Ts...>;
+template <typename... Ts> using map = std::unordered_multimap<Ts...>;
+template <typename... Ts> using del = std::function<Ts...>;
+template <typename... Ts> using limits = std::numeric_limits<Ts...>;
 
 #ifdef _DEBUG
 static bool IsDebug = true;

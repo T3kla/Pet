@@ -9,30 +9,28 @@ class App
 {
     // Static
 
-  private:
-    static App *_instance;
-
   public:
-    static App *Instance();
+    static App &Instance();
+
+  private:
+    static App *instance;
 
     // Instance
 
-  private:
-    Threads _threads;
-
-    Input _input;
-    Logic _logic;
-    Render _render;
-
-    bool _quitRequested = false;
-
   public:
     App();
-    ~App();
 
     void Init();
     void Run();
     void Exit();
 
     void Quit();
+
+    Input input;
+    Logic logic;
+    Render render;
+    Threads threads;
+
+  private:
+    bool quitRequested = false;
 };

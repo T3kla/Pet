@@ -5,33 +5,30 @@
 #include "render.h"
 #include "threads.h"
 
-App *App::_instance = nullptr;
+App *App::instance = nullptr;
 
-App *App::Instance()
+App &App::Instance()
 {
-    return _instance;
+    return *instance;
 }
 
 App::App()
 {
     LOG("\nInstance already exists \"%i\"", 3, "!", 29.f);
-    if (_instance)
+
+    if (instance)
         LOG("\nInstance already exists");
 
-    _instance = this;
-}
-
-App::~App()
-{
+    instance = this;
 }
 
 void App::Init()
 {
-    _threads.Init();
+    threads.Init();
 
-    _render.Init();
-    _input.Init();
-    _logic.Init();
+    render.Init();
+    input.Init();
+    logic.Init();
 
     Run();
 }
@@ -46,15 +43,15 @@ void App::Run()
     // AssetLoader::LoadAssets();
     // SceneLoader::LoadScene<SceneAudio1>();
 
-    while (!_quitRequested)
+    while (!quitRequested)
     {
         // Stasis::RefreshTime();
 
         // Travel();
 
-        _input.Run();
-        _logic.Run();
-        _render.Run();
+        input.Run();
+        logic.Run();
+        render.Run();
 
         // dt = Stasis::GetDelta();
         // fxCount += dt;
@@ -79,13 +76,13 @@ void App::Run()
 
 void App::Exit()
 {
-    _render.Exit();
-    _logic.Exit();
-    _input.Exit();
-    _threads.Exit();
+    render.Exit();
+    logic.Exit();
+    input.Exit();
+    threads.Exit();
 }
 
 void App::Quit()
 {
-    _quitRequested = true;
+    quitRequested = true;
 }

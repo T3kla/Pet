@@ -1,20 +1,18 @@
-// ReSharper disable All
 #pragma once
 
 #include "core.h"
 
 #include "shaderc/shaderc.hpp"
 
-using namespace glm;
 
 struct Vertex
 {
-    vec2 pos;
-    vec3 color;
+	glm::vec2 pos;
+	glm::vec3 color;
 
     static VkVertexInputBindingDescription GetBindingDescription()
     {
-        VkVertexInputBindingDescription desc{};
+        VkVertexInputBindingDescription desc;
         desc.binding = 0;
         desc.stride = sizeof(Vertex);
         desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -73,51 +71,49 @@ struct FramesInFlight
 
 class Render
 {
-    // Static
-
-  private:
-    static Render *_instance;
-
   public:
-    static Render *Instance();
+    void Init();
+    void Run();
+    void Exit();
 
-    // Instance
+    glm::i32vec2 GetWindowSize();
+    GLFWwindow *GetWindow();
 
   private:
-    GLFWwindow *_window = nullptr;
-    const char *_windowTitle = "PetProject";
-    i32vec2 _windowSize = i32vec2(800, 600);
+    GLFWwindow *window = nullptr;
+    const char *windowTitle = "PetProject";
+    glm::i32vec2 windowSize = glm::i32vec2(800, 600);
 
-    const list<const char *> _vkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
-    const list<const char *> _vkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    const list<const char *> vkValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+    const list<const char *> vkDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-    VkInstance _vkInstance{};
-    VkInstanceCreateInfo _vkInstanceInfo{};
-    VkApplicationInfo _vkAppInfo{};
-    VkDebugUtilsMessengerEXT _vkMessenger{};
-    VkDebugUtilsMessengerCreateInfoEXT _vkMessengerInfo{};
-    VkPhysicalDevice _vkPhyDevice{};
-    QueueFamilyIndices _vkPhyDeviceIndices;
-    VkDevice _vkLogDevice{};
-    VkQueue _vkGraphicsQueue{};
-    VkSurfaceKHR _vkSurface{};
-    VkSwapchainKHR _vkCurSwapChain{};
-    VkSwapchainKHR _vkOldSwapChain{};
-    list<VkImage> _vkSwapChainImages{};
-    VkFormat _vkSwapChainImageFormat{};
-    VkExtent2D _vkSwapChainExtent{};
-    list<VkImageView> _vkImageViews;
-    list<VkFramebuffer> _vkFramesBuffer;
-    bool _framebufferResized = false;
-    VkBuffer _vkVertexBuffer{};
-    VkDeviceMemory _vkVertexMemory{};
-    VkRenderPass _vkRenderPass{};
-    VkPipelineLayout _vkPipeLayout{};
-    VkPipeline _vkPipe{};
-    VkCommandPool _vkCmdPool{};
-    FramesInFlight _frames = FramesInFlight(2);
+    VkInstance vkInstance{};
+    VkInstanceCreateInfo vkInstanceInfo{};
+    VkApplicationInfo vkAppInfo{};
+    VkDebugUtilsMessengerEXT vkMessenger{};
+    VkDebugUtilsMessengerCreateInfoEXT vkMessengerInfo{};
+    VkPhysicalDevice vkPhyDevice{};
+    QueueFamilyIndices vkPhyDeviceIndices;
+    VkDevice vkLogDevice{};
+    VkQueue vkGraphicsQueue{};
+    VkSurfaceKHR vkSurface{};
+    VkSwapchainKHR vkCurSwapChain{};
+    VkSwapchainKHR vkOldSwapChain{};
+    list<VkImage> vkSwapChainImages{};
+    VkFormat vkSwapChainImageFormat{};
+    VkExtent2D vkSwapChainExtent{};
+    list<VkImageView> vkImageViews;
+    list<VkFramebuffer> vkFramesBuffer;
+    bool frameBufferResized = false;
+    VkBuffer vkVertexBuffer{};
+    VkDeviceMemory vkVertexMemory{};
+    VkRenderPass vkRenderPass{};
+    VkPipelineLayout vkPipeLayout{};
+    VkPipeline vkPipe{};
+    VkCommandPool vkCmdPool{};
+    FramesInFlight frames = FramesInFlight(2);
 
-    const list<Vertex> _vertices = {          //
+    const list<Vertex> vertices = {          //
         {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},  //
         {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},   //
         {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}}; //
@@ -172,39 +168,28 @@ class Render
     void GetRenderPass(VkRenderPass &pass);
     void GetPipeline(VkPipeline &pipe, VkPipelineLayout &layout);
 
-    list<char> GenerateShader(str path, shaderc_shader_kind kind);
+    list<char> GenerateShader(const str& path, shaderc_shader_kind kind);
     VkShaderModule GetShaderModule(const list<char> &shader);
 
     void GetFramesBuffer(list<VkFramebuffer> &buffer);
     void GetVertexBuffer(VkBuffer &buffer, VkDeviceMemory &memory);
 
     void GetCommandPool(VkCommandPool &pool);
-    void PopulateFrames(FramesInFlight &frames);
+    void PopulateFrames(FramesInFlight &framesInFlight);
 
     void RecordCommandBuffer(const VkCommandBuffer &buffer, u32 idx);
 
     //
 
-    static void OnWindowResize(GLFWwindow *window, int width, int height);
+    static void OnWindowResize(GLFWwindow* window, int width, int height);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                         VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
                                                         void *pUserData);
 
-    u32 FindMemoryType(const u32 &typeFilter, const VkMemoryPropertyFlags &properties);
+    u32 FindMemoryType(const u32 &typeFilter, const VkMemoryPropertyFlags &flags);
 
     void VkCleanup();
     void VkCleanupSwapChain();
-
-  public:
-    Render();
-    ~Render();
-
-    void Init();
-    void Run();
-    void Exit();
-
-    i32vec2 GetWindowSize();
-    GLFWwindow *GetWindow();
 };
